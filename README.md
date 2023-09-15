@@ -1,5 +1,7 @@
-# Julia-Dash-Utlities
+# Julez-Dash is a Julia implementation of Plotly's sample applications under the dash data visualization framework.
 
-🔴 Plotly Dash, provides a comprehensive documentation and a guide to get it up and running within the python ecosystem. Dash offers a wide variety of sample apps built by the       plotly community, to showcase the power of applications built using dash. A downside to those apps, is almost all of them are built in python as a primary language of choice,     utilising relevant dependencies within the python Ecosystem.  Currently, even the dash quick start guide for julia language lacks in the basic dash app up and running.
+🔴 Plotly Dash, provides comprehensive documentation and a guide to get it up and running within the Python ecosystem. Dash offers a wide variety of sample apps built by the Plotly community, to showcase the power of applications built using Dash. A downside to those apps, is almost all of them are built in Python as a primary language of choice,  utilizing relevant dependencies (packages) within the Python ecosystem. 
 
-Julia, being a seemingly promising language for mathematical modelling and data-intensive applications,needs some well deserved respect from a framework built solely upon taking data in mind. This repository provides homage to a number of applications shohwcased under the plotly's dash framework as sample apps, but built entirely upon the julia ecosystem using dash framework.
+Currently, DASH's documentation lacks a lot of information for implementing a bare-bones application in Julia.
+
+Julia, being a seemingly promising language for mathematical modeling and data-intensive applications, needs some well-deserved respect from a framework built solely upon taking data in mind. This repository provides homage to a number of applications showcased under Plotly's Dash framework as sample apps but built entirely upon the Julia ecosystem using the Dash framework.
