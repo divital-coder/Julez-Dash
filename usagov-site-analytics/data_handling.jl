@@ -1,9 +1,11 @@
 using Pkg;
 using HTTP;
 Pkg.add("JSON");
+Pkg.add("Mongoc");
 using JSON;
-
+using Mongoc;
 list_of_agencies =[
+    "All",
     "agency-international-development",
     "agriculture",
     "commerce",
@@ -58,6 +60,18 @@ function fetch_agencies()
 
 end
 
+# notes for mongodb connection 
+# ensure ur tsl errors by setting ssl_cert_file to your cert.pem
+# also make sure to removev the braces in ur connection string 
+
+function database_connectivity()
+    connection_uri = "mongodb+srv://hurtbadly:tricycle123@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
+    client_connection = Mongoc.Client(connection_uri); 
+    println(Mongoc.ping(client_connection));
+    document = Dict("dummykeyone"=>"dummyvalueone","dummykeytwo"=>"dummyvaluetwo","dummykeythree"=>"dummyvvaluethree");
+
+
+end
 
 
 
@@ -70,8 +84,7 @@ function  fetch_data()
     println(JSON.json(data_blob));
 end
 
-
-
+database_connectivity();
 
 
 

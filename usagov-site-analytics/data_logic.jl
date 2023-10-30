@@ -74,3 +74,12 @@ Most popular (side bar)
 top domains past week 
 top domais past month 
 top pages nonw 
+
+
+
+GITHUBSTUDENT50-BS6COT : mongodb access code for student 50$ worth 
+deps : Mongoc
+
+
+for graphing 
+    deps : Plotly

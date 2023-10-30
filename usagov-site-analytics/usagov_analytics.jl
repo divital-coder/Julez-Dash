@@ -6,6 +6,7 @@
 
 using Pkg;
 Pkg.add("Dash");
+Pkg.add("Plotly")
 
 
 using Dash;
@@ -21,7 +22,10 @@ list_of_report_types = fetch_report_types();
 agency_dropdown_options = [];
 println(list_of_agencies);
 for agency in list_of_agencies
-    dropdown_dict = Dict("label"=>agency, "value"=>agency);
+    agency_name_split_array = split(agency,"-");
+    agency_name_joined = join(agency_name_split_array," ");
+    
+    dropdown_dict = Dict("label"=>uppercasefirst(agency_name_joined), "value"=>agency);
     push!(agency_dropdown_options,dropdown_dict);
 end
 
@@ -33,15 +37,32 @@ Application.title = "USA.GOV Site Analytics";
 application_layout = html_div(children = [
     html_header(
         children = [
-        html_img(src="./assets/usagov_logo.png" , alt = "USA.GOV logo" , className="usagov_logo"),
+            html_a(children=[
+                html_img(src="./assets/usagov_logo.png" , alt = "USA.GOV logo" , className="usagov_logo"),
+            ], href="https://usa.gov"),
         html_h1("USA GOVERNMENT WEBSITE ANALYTICS", className="site_heading"),
-        dcc_dropdown(options = agency_dropdown_options ,value = agency_dropdown_options[1]["value"], className="agency_dropdown"),
+            dcc_dropdown(options = agency_dropdown_options ,value = agency_dropdown_options[1]["value"],style=Dict("border"=>"none","border-radius"=>"40px", "padding"=>"0.3rem 1rem", "display"=>"flex" ,"align-items"=>"center"),id="agency_dropdown"),
         html_div(children = [
-            html_a("USA.Gov", href = "https://www.usa.gov")
-        ], className = "site_redirect_link")
+            html_a("USA.Gov", href = "https://usa.gov",className= "site_redirect_link")
+        ],className="site_redirect_link_container")
     ],
     className = "content-header"
+),
+
+
+html_div(
+    children=[
+    html_div(children=[
+    dcc_graph()
+    ]),
+    html_div(children=[
+
+    ])
+    ]
+    ,
+    className = "main-content-container"
 )
+
 
 
 ]);

@@ -1,43 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200&display=swap');
+
 body{
-    background-color: whitesmoke;
-    margin:0px;
-    padding:0px;
-
+    margin:0;
+    padding:0;
+    font-family:'Raleway', sans-serif;
+    background-color:#FFFBF5 ;
+    color:dimgray;
 }
-
+.site_heading{
+    font-size:1.3rem;
+}
+.content-header{
+    display:flex;
+    flex-direction:row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #F7EFE5;
+    margin:0;
+}
 .usagov_logo{
     width:3rem;
     height:3rem;
-    border-radius : 50%;
-    padding:0.5rem;
+    cursor:pointer;
+    animation:spin 1s infinite;
 }
-.usagov_logo:hover{
-    cursor: pointer;
+
+@keyframes spin{
+    100%{
+        transform: rotate(360deg);
+    }
 }
 
 .content-header{
-    display:flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    font-weight: 100;
-    padding: 0.3rem 2rem;
-    font-size : 0.8rem;
-    background-color:gainsboro ;
-    border-bottom: 2px solid gray;
-    margin:0px;
+    padding:0.5rem 3rem;
 }
 
-.agency_dropdown{
-min-width: 40rem;
-text-align: center;
-font-size:1.4rem;
+#agency_dropdown{
+min-width:35rem;
+box-shadow: none;
+
 }
 
-.site_heading{
-    margin-left : 0.5rem;
-}
 .site_redirect_link{
-margin-left:2rem;
+    text-decoration: none;
+    border-radius: 20px;
+    padding:0.3rem 0.5rem;
+    color:dimgray;
+}
+.site_redirect_link_container{
+animation:bounce 1s infinite;
+}
+
+
+
+ @keyframes bounce { 0%, 100% { 
+    transform: translateY(-25%);
+     animation-timing-function: cubic-bezier(0.8, 0, 1, 1); 
+    }
+     50% { transform: translateY(0);
+         animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+     }
+    }
+
+.site_redirect_link:visited{
+color:dimgray ;
 }
