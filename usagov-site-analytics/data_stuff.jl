@@ -294,11 +294,12 @@ function fetch_agency_data_from_api()
                 usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
 
             end
+        
 
             requested_content = HTTP.request("GET",usa_gov_api_url, http_headers);
             returned_data_blob = JSON.Parser.parse(String(requested_content.body));
             push!(data_blob_array,returned_data_blob);
-
+        end
         #no need to create a file since data base have been connected
         #newfile = open("./agencies_site_report_data/$chosen_agency_name-site-report.json","w");
         # write(newfile,JSON.json(returned_data_blob));
@@ -307,7 +308,7 @@ function fetch_agency_data_from_api()
 
     end
 end
-end     
+
 
 
 

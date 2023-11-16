@@ -82,27 +82,46 @@ list of agencies/departments that can be queried
 
 data on the main page for each agency
 -POPULAR SECTION
-:Top domains (past week) [DOMAIN-REPORT] [SITE] [SECOND-LEVEL-DOMAIN]
-:Top domains (past month) [DOMAIN-REPORT] [SITE] [SECOND-LEVEL-DOMAIN]
-:Top pages (now) [DOMAIN-REPORT] [SITE] [SECOND-LEVEL-DOMAIN]
+:Top domains (past week) [DOMAIN-REPORT] query after=2023-11-pastweek
+:Top domains (past month) [DOMAIN-REPORT] query after=2023-10-pastmonth
+:Top pages (now) [DOMAIN-REPORT] 
 
 
--number of people on all sites of that agency [TRAFFIC-SOURCE REPORT]
--total users on all of the sites of that agency wihtin past month [TRAFFIC-SOURCE REPORT]
--total visits on all of the sites of that agency within past month [TRAFFIC-SOURCE REPORT]
+
+
+
+-number of people on all sites of that agency 
+
+
+-total users on all of the sites of that agency wihtin past month 
+
+-total visits on all of the sites of that agency within past month 
+
 
 
 -TRaffic breakdown 
-:total number of visits today which are time stamped on a graph , (are on all of the sites and subdomains of that agency) [TRAFFIC-SOURCE REPORT]
-:location of visitors, highlighted within each state on the US map (on all sites of that agency) [TRAFFIC-SOURCE REPORT]
-:Top downloads (yesterday) (under the agency sites) [DOWNLOAD REPORT]
+:total number of visits today which are time stamped on a graph , (are on all of the sites and subdomains of that agency)
 
+:location of visitors, highlighted within each state on the US map (on all sites of that agency) 
+https://analytics.usa.gov/data/live/top-cities-realtime.json
+
+:Top downloads (yesterday) (under the agency sites) [DOWNLOAD REPORT]
+download for all
+agency specific downloadd
+
+
+for ALL option
+reports : downloads, domain
+queried with after=2023-11-13
 
 
 
 for each agency , we needed site report 
 returns=> array of objects 
 {"domain":"usaid.gov","id":133011767,"date":"2023-11-13","report_name":"site","report_agency":"agency-international-development","visits":48099}
+reports for each agency : site , download , traffic-source
+
+
 
 
 
