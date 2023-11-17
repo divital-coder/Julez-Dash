@@ -3,11 +3,17 @@ Pkg.add("DotEnv");
 Pkg.add("HTTP");
 Pkg.add("JSON");
 Pkg.add("Mongoc");
+Pkg.add("CSV");
+Pkg.add("DataFrames");
+
 using DotEnv;
 using HTTP;
 using JSON;
 using Mongoc;
+using CSV;
+using DataFrames;
 
+# page page_title active_visitors
 
 #configuring environment variables
 DotEnv.config();
@@ -16,14 +22,32 @@ DotEnv.config();
 #global vars
 UPLOAD_DATA_TO_MONGODB = true;
 
+
+
+
+
+
+
+
+
+function handle_csv_data(data_blob)
+json_data_array = [];
+for row in eachrow(data_blob)
+    row_dict = Dict("page"=>row[1],"page_title"=>row[2],"active_visitors"=>row[3]);
+    push!(json_data_array,row_dict);
+end
+return json_data_array;
+
+end
+
 function fetch_report_names()
 report_name_list = [
 "site",
 "download",
-"all-pages-realtime",
-"top-traffic-sources-30-days",
-"top-countries-realtime",
-"top-cities-realtime"
+"all-pages-realtime.csv",
+"top-traffic-sources-30-days.json",
+"top-countries-realtime.json",
+"top-cities-realtime.json"
 ]
 return report_name_list;
 end
@@ -89,6 +113,11 @@ topcountriesrealtime_report_data = data_blob_array[5];
 topcitiesrealtime_report_data =  data_blob_array[6];
 
 
+
+
+# handling csv data 
+    
+
 #establish connection wtih the mongodb atlas
 mongodb_atlas_access_code = ENV["MONGODB_ACCESS_CODE"];
 mongodb_username = ENV["MONGODB_USERNAME"];
@@ -109,6 +138,7 @@ end
 # print(Mongoc.ping(client_connection))
 end
 
+
 function fetch_agency_data_from_api()
     agencies_list = fetch_agency_names("agency_name_list");
     reports_list = fetch_report_names();
@@ -116,196 +146,93 @@ function fetch_agency_data_from_api()
     chosen_report_name = "";
     usa_gov_api_key = ENV["USA_GOV_API_KEY"];
     
-    http_headers = Dict("x-api-key"=>"$usa_gov_api_key");
-    
+    http_headers_for_api_fetch = Dict("x-api-key"=>"$usa_gov_api_key");
     # println(length(agencies_list));
-    # println(agencies_list[2])
+    lowercase_agencies_list_excluding_all = [];
+    for agency in agencies_list
+    push!(lowercase_agencies_list_excluding_all,lowercase(agency));
+    end
+    lowercase_agencies_list_excluding_all = lowercase_agencies_list_excluding_all[2:end];    
+  
+  # println(agencies_list[2])
     for num in 1:length(agencies_list)
         data_blob_array = [];
+        data_is_csv = false; #checks for whether the requested data is csv or not 
+        make_http_requests = false;
+
+
         for report in reports_list
             chosen_report_name = report;
             lowercase_agency_name = lowercase(agencies_list[num]);
             chosen_agency_name = lowercase_agency_name;
             usa_gov_api_url = "";
+            usa_gov_http_url = "";
 
+  
+           
+            
+            
+
+
+            # different things for "all" and individual agencies
             if (chosen_agency_name == "all" && (chosen_report_name in ["site","download"]))
                 usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name == "all" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/live/$chosen_report_name.csv";
-            
-            elseif(chosen_agency_name == "agency-international-development" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="agency-international-development" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/agency-international-development/$chosen_report_name.csv";
+                make_http_requests = false;
+            elseif(chosen_agency_name == "all" && (chosen_report_name in ["all-pages-realtime.csv","top-traffic-sources-30-days.json","top-countries-realtime.json","top-cities-realtime.json"]))
+                usa_gov_http_url = "https://analytics.usa.gov/data/live/$chosen_report_name";
+                make_http_requests = true;
 
-            elseif(chosen_agency_name == "agriculture" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="agriculture" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-    
-            elseif(chosen_agency_name == "commerce" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="commerce" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "defense" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="defense" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "education" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="education" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "energy" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="energy" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
+                if chosen_report_name == "all-pages-realtime.csv"
+                    data_is_csv = true;
+                else
+                    data_is_csv = false;
+                end
                 
-
-            elseif(chosen_agency_name == "environmental-protection-agency" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="environmental-protection-agency" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
                 
-
-            elseif(chosen_agency_name == "executive-office-president" && (chosen_report_name in ["site","download"]))
+            elseif(chosen_agency_name  in lowercase_agencies_list_excluding_all && (chosen_report_name in ["site","download"]))
                 usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="executive-office-president" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "general-services-administration" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="general-services-administration" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "health-human-services" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="health-human-services" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-            
-            elseif(chosen_agency_name == "homeland-security" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="homeland-security" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "housing-urban-development" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="housing-urban-development" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "interior" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="interior" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "justice" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="justice" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "labor" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="labor" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "national-aeronautics-space-administration" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="national-aeronautics-space-administration" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "national-archives-records-administration" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="national-archives-records-administration" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "national-science-foundation" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="national-science-foundation" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "nuclear-regulatory-commission" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="nuclear-regulatory-commission" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-            
-            elseif(chosen_agency_name == "office-personnel-management" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="office-personnel-management" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "postal-service" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="postal-service" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "small-business-administration" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="small-business-administration" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "social-security-administration" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="social-security-administration" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "state" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="state" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-             
-            elseif(chosen_agency_name == "transportation" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="transportation" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
-
-            elseif(chosen_agency_name == "treasury" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="treasury" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
+                make_http_requests = false;
+            elseif(chosen_agency_name in lowercase_agencies_list_excluding_all && (chosen_report_name in ["all-pages-realtime.csv","top-traffic-sources-30-days.json","top-countries-realtime.json","top-cities-realtime.json"]))
+                usa_gov_http_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name";
+                make_http_requests = true;
+                if chosen_report_name == "all-pages-realtime.csv"
+                    data_is_csv = true;
+                else
+                    data_is_csv = false;
+                end
 
                 
-            elseif(chosen_agency_name == "veterans-affairs" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-            elseif(chosen_agency_name =="veterans-affairs" && (chosen_report_name in ["all-pages-realtime","top-traffic-sources-30-days","top-countries-realtime","top-cities-realtime"]))
-                usa_gov_api_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name.csv";
-
             end
-        
+            
 
-            requested_content = HTTP.request("GET",usa_gov_api_url, http_headers);
-            returned_data_blob = JSON.Parser.parse(String(requested_content.body));
-            push!(data_blob_array,returned_data_blob);
+            if(data_is_csv && make_http_requests) 
+
+                requested_content = HTTP.request("GET",usa_gov_http_url);
+                returned_data_blob = CSV.File(requested_content.body) |> DataFrame;
+                returned_data_blob = handle_csv_data(returned_data_blob);
+                push!(data_blob_array,returned_data_blob);
+
+            elseif (!data_is_csv && make_http_requests)
+                
+
+                    requested_content = HTTP.request("GET",usa_gov_http_url);
+                    returned_data_blob = JSON.Parser.parse(String(requested_content.body));
+                    push!(data_blob_array,returned_data_blob);
+
+            elseif (!data_is_csv && !make_http_requests)
+
+
+                requested_content = HTTP.request("GET",usa_gov_api_url, http_headers_for_api_fetch);
+                returned_data_blob = JSON.Parser.parse(String(requested_content.body)); 
+                push!(data_blob_array, returned_data_blob);
+            end
+            
         end
         #no need to create a file since data base have been connected
         #newfile = open("./agencies_site_report_data/$chosen_agency_name-site-report.json","w");
         # write(newfile,JSON.json(returned_data_blob));
         # close(newfile);
         upload_data_mongodb(data_blob_array,chosen_agency_name);
-
     end
 end
 
