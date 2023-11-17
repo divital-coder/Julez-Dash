@@ -31,15 +31,8 @@ x-api-key = ENV["usa_gov_api_key"]
 
 
 reports that can be fetched from the api 
-
-  ce  download (example) 
-    traffic-sour (example)
-    domain (example)
-    site (example)
-    second-level-domain (example)
-    browser (example)
-    os (example)
-
+download 
+site 
 
 
 
@@ -127,8 +120,21 @@ reports for each agency : site , download , traffic-source
 
 STUFF DONE SO FAR :
 
-DATA FETCHED FROM THE API
-DATA TO BE PUSED INTO THE DATABASED
 DATA TO BE FETCHED FROM THE DATABASE 
 DATA TO BE MANIPULATED
 DATA TO BE PRESENTED
+
+
+
+formatting stuff : 
+
+
+
+
+
+
+
+top domains : 
+past week : query the site api for past week
+past month : query the site api for past month
+pages now : real-time-data (for each agency)

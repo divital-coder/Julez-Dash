@@ -1,18 +1,8 @@
 using Pkg;
-Pkg.add("DotEnv");
-Pkg.add("HTTP");
-Pkg.add("JSON");
-Pkg.add("Mongoc");
-Pkg.add("CSV");
-Pkg.add("DataFrames");
+Pkg.add(["DotEnv","HTTP","JSON","Mongoc","CSV","DataFrames"]);
 
-using DotEnv;
-using HTTP;
-using JSON;
-using Mongoc;
-using CSV;
-using DataFrames;
-
+using DotEnv, HTTP, JSON , CSV, Mongoc, DataFrames;
+# using Dates;
 # page page_title active_visitors
 
 #configuring environment variables
@@ -25,7 +15,19 @@ UPLOAD_DATA_TO_MONGODB = true;
 
 
 
+# function handle_queries(url,time)
+#     current_date = Dates.today();
+#     past_week_date = current_date - Dates.Day(7);
+#     past_month_date = current_date - Dates.Month(1);
 
+#     if time == "month"
+#         url = "$url?after=$past_week_date";
+#         return url;
+#     end
+
+#     url = "$url?after=$past_week_date";
+#     return url; 
+# end
 
 
 
@@ -178,6 +180,8 @@ function fetch_agency_data_from_api()
             if (chosen_agency_name == "all" && (chosen_report_name in ["site","download"]))
                 usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/reports/$chosen_report_name/data";
                 make_http_requests = false;
+
+
             elseif(chosen_agency_name == "all" && (chosen_report_name in ["all-pages-realtime.csv","top-traffic-sources-30-days.json","top-countries-realtime.json","top-cities-realtime.json"]))
                 usa_gov_http_url = "https://analytics.usa.gov/data/live/$chosen_report_name";
                 make_http_requests = true;
@@ -258,3 +262,6 @@ end
 # https://analytics.usa.gov/data/live/top-traffic-sources-30-days.json
 # https://analytics.usa.gov/data/live/top-countries-realtime.json
 # https://analytics.usa.gov/data/live/top-cities-realtime.json
+
+
+

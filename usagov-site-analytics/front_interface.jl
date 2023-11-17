@@ -25,14 +25,29 @@ frontend_layout =  html_div(children=[
 
 
         html_main(
+        # left pane things  
+        html_div(className = "left_pane"),
+                
+                
+                
+                
+        # right pane things 
+        html_div(
+                children=[
 
+
+                ],    
+                className="right_pane")
         ),
 
         
 
 
 
-        html_footer()
+        html_footer(children=[
+            html_p("made with love by "),
+            html_a("@hurtbadly2", href = "https://x.com/hurtbadly2", className = "footer_redirect_link")
+        ], className = "site_footer")
     ]);
 
 
