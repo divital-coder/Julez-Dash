@@ -24,8 +24,7 @@ function top_domain_data(document_data,agency)
     past_week_date = today() - Day(7);
     priority_data_dict_array_weekly = [];
 
-# top pages now (all-pages-realtime-report-data)
-    priority_data_dict_array_now = [];    
+
 
 
 
@@ -65,9 +64,18 @@ function top_domain_data(document_data,agency)
             # end
 
 
-    # managing and fetching data from the document
-    number_of_object_in_realtime_data_key = length(document_data)
+    
 
+    # top pages now (all-pages-realtime-report-data)
+    priority_data_dict_array_now = [];    
+
+    number_of_object_in_realtime_data_key = length(document_data)
+    for num in 0 : number_of_object_in_realtime_data_key-1
+        entry_page_title = document_data["all-pages-realtime-report-data"]["$num"]["page_title"];
+        entry_page_domain = document_data["all-pages-realtime-report-data"]["$num"]["page"];
+        entry_page_visit_count = document_data["all-pages-realtime-report-data"]["$num"]["active_visitors"];
+        push!(priority_data_dict_array_now, Dict("domain"=>entry_page_title,"visits"=>entry_page_visit_count));        
+    end
 
 
     top_domain_data_dict["monthly_domain_data"] = priority_data_dict_array_monthly;
@@ -98,4 +106,4 @@ end
 
 
 
-print(fetch_site_report_data_from_mongodb("education"));
+# print(fetch_site_report_data_from_mongodb("education"));

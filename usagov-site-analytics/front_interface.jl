@@ -1,7 +1,9 @@
 using Pkg;
 Pkg.add("Dash"); #this enables us to launch our web app
 Pkg.add("Plotly"); #this enables us to create plots and graphs
+
 include("./data_stuff.jl");
+include("./data_logic.jl");
 using Dash;
 using PlotlyJS;
 #for dropdowns u need an options attribute ,and that attribute needs  an array of dictionary with key value pairs of label and value
@@ -12,7 +14,8 @@ return lowercased_agency_name;
 end
 
 
-
+# GLOBAL VARAIBLES 
+TOP_DOMAIN_DATA_DICT = nothing;
 
 
 
@@ -38,7 +41,7 @@ frontend_layout =  html_div(children=[
             dcc_tabs(children = [
                 Dict("label"=>"Top Domains\n(Past Week)","value"=>"weekly_domains"),
                 Dict("label"=>"Top Domains\n(Past Month)","value"=>"monthly_domains"),
-                Dict("label"=>"Top Pages\n(Now)", value=>"pages_now")
+                Dict("label"=>"Top Pages\n(Now)", "value"=>"pages_now")
             ])] ,className = "left_pane"),              
         # right pane things 
         html_div(
@@ -57,10 +60,6 @@ frontend_layout =  html_div(children=[
 
 
 
-# callbacks related to our application
-callback!(Application,Output(),Input());
-
-
 
 
 
@@ -73,11 +72,16 @@ Application.layout = frontend_layout;
 
  
 
-callback!(Application, Output("show_this","children"),Input("agency_dropdown","value"))
-do dropdownvalue 
-    return dropdownvalue
-end
-;
+# callbacks related to our application
+callback!(Application,Output("showthis","children"),Input("agency_dropdown","value"))do selected_agency_option 
+    lowercased_agency_name = return_agency_from_the_dropdown(selected_agency_option);
+    # need to call the function that fetches data for the relevant agency 
+    TOP_DOMAIN_DATA_DICT = fetch_site_report_data_from_mongodb(lowercased_agency_name); #this returns a dictionary with keys "monthly_domain_data", "weekly_domain_data", "now_domain_data" which are arrays of dictionaryies with key "domain", "visits"
+    
+    end
+    
+    
+    
 
 run_server(Application,"0.0.0.0",debug=true);
 

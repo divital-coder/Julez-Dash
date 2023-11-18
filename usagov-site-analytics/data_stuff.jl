@@ -32,7 +32,7 @@ UPLOAD_DATA_TO_MONGODB = true;
 
 
 
-function handle_csv_data(data_blob)
+function convert_csv_data_to_json(data_blob)
 json_data_array = [];
 for row in eachrow(data_blob)
     row_dict = Dict("page"=>row[1],"page_title"=>row[2],"active_visitors"=>row[3]);
@@ -104,9 +104,21 @@ end
 
 
 
+function authorise_mongodb_connection()
+mongodb_authentication_stuff = Dict();
+mongodb_access_code = ENV["MONGODB_ACCESS_CODE"];
+mongodb_username = ENV["MONGODB_USERNAME"];
+mongodb_password = ENV["MONGODB_PASSWORD"];
+mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
+mongodb_connected_client = Mongoc.Client(mongodb_connection_uri);
+return mongodb_connected_client;
+end
+
+
 
 function upload_data_mongodb(data_blob_array,agency_name)
 #handling data 
+# DATA BLOB ARRAY IS AN ARRAY OF ARRAYS CONTAINING DICTIONARY DATA
 site_report_data = data_blob_array[1];
 download_report_data = data_blob_array[2];
 allpagesrealtime_report_data = data_blob_array[3];
@@ -117,19 +129,16 @@ topcitiesrealtime_report_data =  data_blob_array[6];
 
 
 
-# handling csv data 
+# handling csv data /
     
 
 #establish connection wtih the mongodb atlas
-mongodb_atlas_access_code = ENV["MONGODB_ACCESS_CODE"];
-mongodb_username = ENV["MONGODB_USERNAME"];
-mongodb_password = ENV["MONGODB_PASSWORD"];
+
 agency_data_to_be_uploaded = Dict("id"=>agency_name, "site-report-data"=>Mongoc.BSON(site_report_data), "download-report-data"=>Mongoc.BSON(download_report_data),"all-pages-realtime-report-data"=>Mongoc.BSON(allpagesrealtime_report_data),"top-traffic-sources-30-days-report-data"=>Mongoc.BSON(toptrafficsources30days_report_data),"top-countries-realtime-report-data"=>Mongoc.BSON(topcountriesrealtime_report_data),"top-cities-realtime-report-data"=>Mongoc.BSON(topcitiesrealtime_report_data));
-
-
-mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
-client_connection  = Mongoc.Client(mongodb_connection_uri);
+client_connection  = authorise_mongodb_connection();
 mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+
+
 
 exising_document_check = Mongoc.find_one(mongodb_target_data_collection,Mongoc.BSON(Dict("id"=>agency_name)));
 
@@ -142,6 +151,12 @@ end
 
 
 function fetch_agency_data_from_api()
+    # -----------------------------------------------------emptying the entire database here to ensure that new data is actively being fed into the db every now and then--------------------
+    mongodb_client_connection = authorise_mongodb_connection();
+    mongodb_entire_collection = mongodb_client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+    empty!(mongodb_entire_collection);
+    #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     agencies_list = fetch_agency_names("agency_name_list");
     reports_list = fetch_report_names();
     chosen_agency_name = "";
@@ -212,23 +227,45 @@ function fetch_agency_data_from_api()
             if(data_is_csv && make_http_requests) 
 
                 requested_content = HTTP.request("GET",usa_gov_http_url);
+                
+                # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function 
+                if length(String(requested_content.body)) < 1
+                    requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                    push!(data_blob_array,requested_content); 
+                else
                 returned_data_blob = CSV.File(requested_content.body) |> DataFrame;
-                returned_data_blob = handle_csv_data(returned_data_blob);
+                returned_data_blob = convert_csv_data_to_json(returned_data_blob);
                 push!(data_blob_array,returned_data_blob);
+                end
+
 
             elseif (!data_is_csv && make_http_requests)
+                requested_content = HTTP.request("GET",usa_gov_http_url);
                 
-
-                    requested_content = HTTP.request("GET",usa_gov_http_url);
+                    if length(String(requested_content.body)) < 1 
+                        requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                        push!(data_blob_array,requested_content); 
+                    else
                     returned_data_blob = JSON.Parser.parse(String(requested_content.body));
                     push!(data_blob_array,returned_data_blob);
+                    end
 
             elseif (!data_is_csv && !make_http_requests)
-
-
                 requested_content = HTTP.request("GET",usa_gov_api_url, http_headers_for_api_fetch);
-                returned_data_blob = JSON.Parser.parse(String(requested_content.body)); 
-                push!(data_blob_array, returned_data_blob);
+                
+                
+                if length(String(requested_content.body)) < 1 
+                    requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                    push!(data_blob_array,requested_content); 
+                else
+                   
+                    # println("second", length(String(requested_content.body)) < 1)
+                    println(sizeof(requested_content.body));
+                    println(usa_gov_api_url);
+                    println(requested_content);
+                    returned_data_blob = JSON.Parser.parse(String(requested_content.body)); 
+                    push!(data_blob_array, returned_data_blob);
+                end
             end
             
         end
@@ -239,8 +276,6 @@ function fetch_agency_data_from_api()
         upload_data_mongodb(data_blob_array,chosen_agency_name);
     end
 end
-
-
 
 
 
