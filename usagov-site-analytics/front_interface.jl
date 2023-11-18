@@ -55,13 +55,17 @@ frontend_layout =  html_div(children=[
                 dcc_tab(label="Top Domains\n(Past Week)",value="weekly_domains"),
                 dcc_tab(label="Top Domains\n(Past Month)",value="monthly_domains"),
                 dcc_tab(label="Top Pages\n(Now)", value="pages_now")
-            ])] ,id="left_pane_tabs"),              
+            ],id="left_pane_tabs"),
+            
+            html_div(id="left_pane_graphs")
+            ] ,id="left_pane"),              
         # right pane things 
         html_div(
                 children=[
                 html_h1("apple")
-                ],    
-                className="right_pane")]),
+                ],              
+                className="right_pane")],
+                className="main_content"),
 
 # footer section of the page 
         html_footer(children=[
@@ -98,7 +102,7 @@ callback!(Application,Output("showthis","children"),Input("agency_dropdown","val
 end
 
 
-callback!(Application,Output("graph","children"),Input("left_pane_tabs","value")) do tab_value
+callback!(Application,Output("left_pane_graphs","children"),Input("left_pane_tabs","value")) do tab_value
 if tab_value == "weekly_domains"
     FINAL_WEEKLY_DOMAIN_DATA = finalise_top_domains_past_week(TOP_DOMAIN_DATA_DICT["weekly_domain_data"]);    
 elseif tab_value == "monthly_domains"

@@ -31,8 +31,15 @@ x-api-key = ENV["usa_gov_api_key"]
 
 
 reports that can be fetched from the api 
-download 
-site 
+
+  ce  download (example) 
+    traffic-sour (example)
+    domain (example)
+    site (example)
+    second-level-domain (example)
+    browser (example)
+    os (example)
+
 
 
 
@@ -73,11 +80,11 @@ list of agencies/departments that can be queried
 
 
 
-data on the main page for each agency
--POPULAR SECTION
-:Top domains (past week) [DOMAIN-REPORT] query after=2023-11-pastweek
-:Top domains (past month) [DOMAIN-REPORT] query after=2023-10-pastmonth
-:Top pages (now) [DOMAIN-REPORT] 
+peopel on all sites right : all-pages-real-time-report
+total users (past month) : 
+total visits (pasth month) : site-report-data
+
+
 
 
 
@@ -126,15 +133,15 @@ DATA TO BE PRESENTED
 
 
 
-formatting stuff : 
+
+each agency : 
+site data : fire
+download data : 
+all pages realtime data : 
+top traffic sources 30 days data : 
+top countries realtime data :
+top cities realtime data : 
 
 
 
 
-
-
-
-top domains : 
-past week : query the site api for past week
-past month : query the site api for past month
-pages now : real-time-data (for each agency)

@@ -68,3 +68,21 @@ animation:bounce 1s infinite;
 .site_redirect_link:visited{
 color:black ;
 }
+.main_content{
+    display:flex;
+}
+.left_pane {
+flex:1;
+}
+.right_pane{
+flex:4;
+}
+.site_footer{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    background-color:#776B5D;
+    color : #ffffff;
+    position:absolute;
+    bottom:0;
+}

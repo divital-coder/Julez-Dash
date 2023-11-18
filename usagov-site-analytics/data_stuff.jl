@@ -234,7 +234,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                 requested_content_body_string = String(requested_content.body);
                 # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function 
                 if length(requested_content_body_string) < 1
-                    requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                    requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
                     push!(data_blob_array,requested_content); 
                 else
                 returned_data_blob = CSV.File(requested_content_body) |> DataFrame;
@@ -247,7 +247,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                 requested_content = HTTP.request("GET",usa_gov_http_url);
                 requested_content_body_string = String(requested_content.body);
                     if length(requested_content_body_string) < 1 
-                        requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                        requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
                         push!(data_blob_array,requested_content); 
                     else
                     returned_data_blob = JSON.Parser.parse(requested_content_body_string);
@@ -259,7 +259,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                 requested_content_body_string = String(requested_content.body);
                 
                 if length(requested_content_body_string) < 1 
-                    requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
+                    requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
                     push!(data_blob_array,requested_content); 
                 else
                     returned_data_blob = JSON.Parser.parse(requested_content_body_string); 
