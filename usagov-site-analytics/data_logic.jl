@@ -1,14 +1,24 @@
 # operating over onto the site data 
 using Pkg;
 Pkg.add(["DotEnv","Mongoc","DataFrames","JSON"]);
-using DotEnv, Mongoc, Dates, JSON;
+using  Mongoc, Dates, JSON;
 
 # configuring dot env for env vars
-DotEnv.config();
 
-mongodb_access_code = ENV["MONGODB_ACCESS_CODE"];
-mongodb_username = ENV["MONGODB_USERNAME"];
-mongodb_password  = ENV["MONGODB_PASSWORD"];
+# connecting to database as a client
+function authorise_mongodb_connection()
+    mongodb_authentication_stuff = Dict();
+    mongodb_access_code = ENV["MONGODB_ACCESS_CODE"];
+    mongodb_username = ENV["MONGODB_USERNAME"];
+    mongodb_password = ENV["MONGODB_PASSWORD"];
+    mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
+    mongodb_connected_client = Mongoc.Client(mongodb_connection_uri);
+    return mongodb_connected_client;
+end
+    
+    
+
+
 
 # separate out the values for weekly and monthly 
 function top_domain_data(document_data,agency)
@@ -87,8 +97,7 @@ end
 
 
 function fetch_site_report_data_from_mongodb(which_agency_data)
-    mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
-    client_connection  = Mongoc.Client(mongodb_connection_uri);
+    client_connection  = authorise_mongodb_connection();
     mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
     agency_top_domain_data = nothing;
     # weekly 
@@ -100,10 +109,78 @@ function fetch_site_report_data_from_mongodb(which_agency_data)
         end
     end
     
-    return agency_top_domain_data;  #here we are going to be getting 
+    return agency_top_domain_data;  #here we are going to be getting  #returnds dict->arrays->dicts
 end
 
 
 
 
 # print(fetch_site_report_data_from_mongodb("education"));
+
+
+# data for right pane
+# right pane first section 
+function fetch_all_pages_realtime_report_data_from_mongodb(which_agency_data)
+client_connection = authorise_mongodb_connection();
+mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+people_on_all_sites_right_now_data = Dict();
+for document in mongodb_target_data_collection
+    if document["id"] == which_agency_data
+        people_on_all_sites_right_now_data["data"] =   document["all-pages-realtime-report-data"];
+        break;
+    end
+end
+return people_on_all_sites_report; #$dict with data key set to the array of dicts;
+end
+
+function fetch_top_traffic_sources_30_days_report_data_from_mongodb(which_agency_data)
+client_connection = authorise_mongodb_connection();
+mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+top_traffic_sources_30_days_report_data = Dict();
+for document in mongodb_target_data_collection
+    if document["id"] == which_agency_data
+        top_traffic_sources_30_days_report_data["data"] = document["top-traffic-sources-30-days-report-data"];
+        break;
+    end
+end
+return top_traffic_sources_30_days_report_data;
+end
+
+
+
+# total visits past month : site-report-data => visits 
+function fetch_top_cities_realtime_report_data_from_mongodb(which_agency_data)
+client_connection = authorise_mongodb_connection();
+mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+top_cities_realtime_report_data = Dict();
+for document in mongodb_target_data_collection
+    if document["id"] == which_agency_data
+        top_cities_realtime_report_data["data"] = document["top-cities-realtime-report-data"];
+    end
+end
+return top_cities_realtime_report_data;
+end
+
+function fetch_download_report_data_from_mongodb(which_agency_data)
+client_connection = authorise_mongodb_connection();
+mongodb_target_data_collection = client_connection["usaa_gov_site_analytics"]["agencies_report_data"];
+download_report_data = Dict();
+for document in mongodb_target_data_collection
+    if document["id"] == which_agency_data
+        download_report_data["data"] = document["download-report-data"];
+    end
+end
+return download_report_data;
+end
+
+function fetch_top_countries_realtime_report_data_from_mongodb(which_agency_data)
+    client_connection = authorise_mongodb_connection();
+    mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+    top_countries_realtime_report_data = Dict();
+    for document in mongodb_target_data_collection
+        if document["id"] == which_agency_data
+            top_countries_realtime_report_data["data"] = document["top-countries-realtime-report-data"];
+        end
+    end
+    return top_countries_realtime_report_data;
+end

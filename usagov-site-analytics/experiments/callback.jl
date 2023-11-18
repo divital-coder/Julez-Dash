@@ -22,7 +22,7 @@ html_h1("value is :"),
 html_h1(id="showthis") ,
 # Create a plot
 html_div(children=[
-    dcc_graph(figure = plot(scatter_plot,layout))    
+    dcc_graph(figure = plot(scatter_plot,layout))       
 ])
 ]); 
  #here goes all the code that is not to be included within 

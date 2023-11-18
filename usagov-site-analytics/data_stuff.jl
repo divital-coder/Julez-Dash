@@ -1,3 +1,6 @@
+# all about fetching the data from the api and feeding it within the mongodb instance
+
+
 using Pkg;
 Pkg.add(["DotEnv","HTTP","JSON","Mongoc","CSV","DataFrames"]);
 
@@ -150,7 +153,7 @@ end
 end
 
 
-function fetch_agency_data_from_api()
+function fetch_agency_data_from_api_and_upload_to_mongodb()
     # -----------------------------------------------------emptying the entire database here to ensure that new data is actively being fed into the db every now and then--------------------
     mongodb_client_connection = authorise_mongodb_connection();
     mongodb_entire_collection = mongodb_client_connection["usa_gov_site_analytics"]["agencies_report_data"];
@@ -227,13 +230,14 @@ function fetch_agency_data_from_api()
             if(data_is_csv && make_http_requests) 
 
                 requested_content = HTTP.request("GET",usa_gov_http_url);
-                
+                requested_content_body = requested_content.body;
+                requested_content_body_string = String(requested_content.body);
                 # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function 
-                if length(String(requested_content.body)) < 1
+                if length(requested_content_body_string) < 1
                     requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
                     push!(data_blob_array,requested_content); 
                 else
-                returned_data_blob = CSV.File(requested_content.body) |> DataFrame;
+                returned_data_blob = CSV.File(requested_content_body) |> DataFrame;
                 returned_data_blob = convert_csv_data_to_json(returned_data_blob);
                 push!(data_blob_array,returned_data_blob);
                 end
@@ -241,29 +245,24 @@ function fetch_agency_data_from_api()
 
             elseif (!data_is_csv && make_http_requests)
                 requested_content = HTTP.request("GET",usa_gov_http_url);
-                
-                    if length(String(requested_content.body)) < 1 
+                requested_content_body_string = String(requested_content.body);
+                    if length(requested_content_body_string) < 1 
                         requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
                         push!(data_blob_array,requested_content); 
                     else
-                    returned_data_blob = JSON.Parser.parse(String(requested_content.body));
+                    returned_data_blob = JSON.Parser.parse(requested_content_body_string);
                     push!(data_blob_array,returned_data_blob);
                     end
 
             elseif (!data_is_csv && !make_http_requests)
                 requested_content = HTTP.request("GET",usa_gov_api_url, http_headers_for_api_fetch);
+                requested_content_body_string = String(requested_content.body);
                 
-                
-                if length(String(requested_content.body)) < 1 
+                if length(requested_content_body_string) < 1 
                     requested_content = [Dict("dummy_data_label"=>"dummy_data_value")]; #*******************important
                     push!(data_blob_array,requested_content); 
                 else
-                   
-                    # println("second", length(String(requested_content.body)) < 1)
-                    println(sizeof(requested_content.body));
-                    println(usa_gov_api_url);
-                    println(requested_content);
-                    returned_data_blob = JSON.Parser.parse(String(requested_content.body)); 
+                    returned_data_blob = JSON.Parser.parse(requested_content_body_string); 
                     push!(data_blob_array, returned_data_blob);
                 end
             end
@@ -284,7 +283,7 @@ end
 
 
 if UPLOAD_DATA_TO_MONGODB
-fetch_agency_data_from_api();
+fetch_agency_data_from_api_and_upload_to_mongodb();
 UPLOAD_DATA_TO_MONGODB = false;
 end
 # upload_data_mongodb()
