@@ -12,3 +12,7 @@
 ![Screenshot_2023-09-15-09-33-03_7542](https://github.com/divital-coder/Julez-Dash/assets/77094628/6a6725a5-607a-4637-9f86-0ea6a5e1cd7e)
 7094628/9661f406-3253-4175-b8d9-6adcfb6b7e05)
 ![Screenshot_2023-09-15-09-32-59_13864](https://github.com/divital-coder/Julez-Dash/assets/77094628/41334133-95ff-4627-8b9a-be4c912edfdd)
+
+
+
+
