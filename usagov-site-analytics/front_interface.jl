@@ -1,7 +1,7 @@
 using Pkg;
 Pkg.add("Dash"); #this enables us to launch our web app
 Pkg.add("PlotlyJS"); #this enables us to create plots and graphs
-
+Pkg.update();
 
 include("./data_stuff.jl");
 include("./data_logic.jl");
@@ -16,22 +16,24 @@ function return_agency_from_the_dropdown(agency_name)
     return lowercased_agency_name
 end
 
+mongodb_client = authorise_mongodb_connection()
 
 # GLOBAL VARAIBLES
 lowercased_agency_name = "all";
 #--------------------------------------------LARGE DATA SETS--------------------------------------
-TOP_DOMAIN_DATA_DICT = fetch_site_report_data_from_mongodb(lowercased_agency_name) #this returns a dictionary with keys "monthly_domain_data", "weekly_domain_data", "now_domain_data" which are arrays of dictionaryies with key "domain", "visits"
-ALL_PAGES_REALTIME_DATA_DICT = fetch_all_pages_realtime_report_data_from_mongodb(lowercased_agency_name)
-TOP_COUNTRIES_REALTIME_DATA_DICT = fetch_top_countries_realtime_report_data_from_mongodb(lowercased_agency_name)
-TOP_CITIES_REALTIME_DATA_DICT = fetch_top_cities_realtime_report_data_from_mongodb(lowercased_agency_name)
-DOWNLOAD_REPORT_DATA = fetch_download_report_data_from_mongodb(lowercased_agency_name)
-TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercased_agency_name)
+TOP_DOMAIN_DATA_DICT = fetch_site_report_data_from_mongodb(lowercased_agency_name,mongodb_client) #this returns a dictionary with keys "monthly_domain_data", "weekly_domain_data", "now_domain_data" which are arrays of dictionaryies with key "domain", "visits"
+ALL_PAGES_REALTIME_DATA_DICT = fetch_all_pages_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
+TOP_COUNTRIES_REALTIME_DATA_DICT = fetch_top_countries_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
+TOP_CITIES_REALTIME_DATA_DICT = fetch_top_cities_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client )
+DOWNLOAD_REPORT_DATA = fetch_download_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
+TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
 #------------------------------------------------LARGE DATA SETS--------------------------------------------
 
 #-----------------------------------FINALISED DATA VARIABLES VALUES---------------------------------
-FINAL_WEEKLY_DOMAIN_DATA = finalise_top_domains_past_week(TOP_DOMAIN_DATA_DICT);
-FINAL_MONTHLY_DOMAIN_DATA = finalise_top_domains_past_month(TOP_DOMAIN_DATA_DICT);
-FINAL_NOW_PAGES_DATA = finalise_top_pages_now(TOP_DOMAIN_DATA_DICT);
+FINAL_TOP_DOMAIN_DATA_DICT = finalise_top_domains(TOP_DOMAIN_DATA_DICT) #returns a dictionary of dictionary -> arrays 
+FINAL_WEEKLY_DOMAIN_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_week"]
+FINAL_MONTHLY_DOMAIN_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_month"]
+FINAL_NOW_PAGES_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_now"]
 #-----------------------------------FINALISED DATA VARIABLES VALUES------------------------------------
 #global variables
 
@@ -154,6 +156,7 @@ end
 
 
 
+destroy_mongodb_client(mongodb_client)
 run_server(Application, "0.0.0.0", debug=true);
 
 

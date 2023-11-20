@@ -18,6 +18,10 @@ UPLOAD_DATA_TO_MONGODB = true;
 
 
 
+
+
+
+
 # function handle_queries(url,time)
 #     current_date = Dates.today();
 #     past_week_date = current_date - Dates.Day(7);
@@ -131,6 +135,7 @@ function upload_data_mongodb(data_blob_array, agency_name)
     topcitiesrealtime_report_data = data_blob_array[6]
 
 
+    #check and remove emtpy dictionaries 
 
 
     # handling csv data /
@@ -138,12 +143,7 @@ function upload_data_mongodb(data_blob_array, agency_name)
 
     #establish connection wtih the mongodb atlas
 
-    # println(site_report_data);
-    # println(download_report_data);
-    # println(allpagesrealtime_report_data);
-    # println(toptrafficsources30days_report_data);
-    # println(topcountriesrealtime_report_data);
-    # println(topcitiesrealtime_report_data);
+  
     agency_data_to_be_uploaded = Dict("id" => agency_name, "site-report-data" => Mongoc.BSON(site_report_data), "download-report-data" => Mongoc.BSON(download_report_data), "all-pages-realtime-report-data" => Mongoc.BSON(allpagesrealtime_report_data), "top-traffic-sources-30-days-report-data" => Mongoc.BSON(toptrafficsources30days_report_data), "top-countries-realtime-report-data" => Mongoc.BSON(topcountriesrealtime_report_data), "top-cities-realtime-report-data" => Mongoc.BSON(topcitiesrealtime_report_data))
     client_connection = authorise_mongodb_connection()
     mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"]
@@ -247,8 +247,10 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                 else
 
                     returned_data_blob = CSV.File(IOBuffer(requested_content_body_string)) |> DataFrame
-                    returned_data_blob = convert_csv_data_to_json(returned_data_blob)
+                    returned_data_blob = convert_csv_data_to_json(returned_data_blob)             
                     
+                    
+                    #here we dont need to manipulate anythign cuz we already are calling convert function which converts it into our suitable format 
                     push!(data_blob_array, returned_data_blob)
                 end
 
@@ -260,7 +262,20 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                     requested_content = [Dict("dummy_data_label" => "dummy", "dummy_data_value" => 1)] #*******************important
                     push!(data_blob_array, requested_content)
                 else
-                    returned_data_blob = JSON.Parser.parse(requested_content_body_string)
+                    returned_data_blob = JSON.Parser.parse(requested_content_body_string) #returns an array of dicts with arrays 
+              
+                    #here we are simply putting the required value into the returned_data_blob
+                    returned_data_blob = push!([],returned_data_blob)
+                    # print(typeof(returned_data_blob))
+                    if returned_data_blob[1]["name"] in ["top-countries-realtime","top-cities-realtime","top-traffic-sources-30-days"]
+                    for accessed_dict in returned_data_blob
+                        if haskey(accessed_dict,"data")
+                            returned_data_blob = [accessed_dict]
+                        end
+                    end
+                end
+
+                    
                     push!(data_blob_array, returned_data_blob)
                 end
 
@@ -273,6 +288,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                     push!(data_blob_array, requested_content)
                 else
                     returned_data_blob = JSON.Parser.parse(requested_content_body_string)
+                    returned_data_blob = push!([],returned_data_blob)
                     push!(data_blob_array, returned_data_blob)
                 end
             end
@@ -284,7 +300,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
         # close(newfile);
         upload_data_mongodb(data_blob_array, chosen_agency_name)
     end
-    # close(mongodb_client_connection)
+    Mongoc.destroy!(mongodb_client_connection)
 end
 
 
