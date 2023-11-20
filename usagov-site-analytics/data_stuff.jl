@@ -112,6 +112,7 @@ mongodb_authentication_stuff = Dict();
 mongodb_access_code = ENV["MONGODB_ACCESS_CODE"];
 mongodb_username = ENV["MONGODB_USERNAME"];
 mongodb_password = ENV["MONGODB_PASSWORD"];
+
 mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
 mongodb_connected_client = Mongoc.Client(mongodb_connection_uri);
 return mongodb_connected_client;
@@ -136,7 +137,12 @@ topcitiesrealtime_report_data =  data_blob_array[6];
     
 
 #establish connection wtih the mongodb atlas
-
+println(site_report_data);
+println(download_report_data);
+println(allpagesrealtime_report_data);
+println(toptrafficsources30days_report_data);
+println(topcountriesrealtime_report_data);
+println(topcitiesrealtime_report_data);
 agency_data_to_be_uploaded = Dict("id"=>agency_name, "site-report-data"=>Mongoc.BSON(site_report_data), "download-report-data"=>Mongoc.BSON(download_report_data),"all-pages-realtime-report-data"=>Mongoc.BSON(allpagesrealtime_report_data),"top-traffic-sources-30-days-report-data"=>Mongoc.BSON(toptrafficsources30days_report_data),"top-countries-realtime-report-data"=>Mongoc.BSON(topcountriesrealtime_report_data),"top-cities-realtime-report-data"=>Mongoc.BSON(topcitiesrealtime_report_data));
 client_connection  = authorise_mongodb_connection();
 mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
@@ -233,9 +239,10 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                 requested_content_body = requested_content.body;
                 requested_content_body_string = String(requested_content.body);
                 # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function 
-                if length(requested_content_body_string) < 1
+                if length(requested_content_body_string) < 1 || occursin("\0",requested_content_body_string)
                     requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
                     push!(data_blob_array,requested_content); 
+
                 else
                 returned_data_blob = CSV.File(requested_content_body) |> DataFrame;
                 returned_data_blob = convert_csv_data_to_json(returned_data_blob);
