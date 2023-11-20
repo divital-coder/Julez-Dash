@@ -2,9 +2,9 @@
 
 
 using Pkg;
-Pkg.add(["DotEnv","HTTP","JSON","Mongoc","CSV","DataFrames"]);
+Pkg.add(["DotEnv", "HTTP", "JSON", "Mongoc", "CSV", "DataFrames"]);
 
-using DotEnv, HTTP, JSON , CSV, Mongoc, DataFrames;
+using DotEnv, HTTP, JSON, CSV, Mongoc, DataFrames;
 # using Dates;
 # page page_title active_visitors
 
@@ -29,257 +29,257 @@ UPLOAD_DATA_TO_MONGODB = true;
 #     end
 
 #     url = "$url?after=$past_week_date";
-#     return url; 
+#     return url;
 # end
 
 
 
 
 function convert_csv_data_to_json(data_blob)
-json_data_array = [];
-for row in eachrow(data_blob)
-    row_dict = Dict("page"=>row[1],"page_title"=>row[2],"active_visitors"=>row[3]);
-    push!(json_data_array,row_dict);
-end
-return json_data_array;
+    json_data_array = []
+    for row in eachrow(data_blob)
+        row_dict = Dict("page" => row[1], "page_title" => row[2], "active_visitors" => row[3])
+        push!(json_data_array, row_dict)
+    end
+    return json_data_array
 
 end
 
 function fetch_report_names()
-report_name_list = [
-"site",
-"download",
-"all-pages-realtime.csv",
-"top-traffic-sources-30-days.json",
-"top-countries-realtime.json",
-"top-cities-realtime.json"
-]
-return report_name_list;
+    report_name_list = [
+        "site",
+        "download",
+        "all-pages-realtime.csv",
+        "top-traffic-sources-30-days.json",
+        "top-countries-realtime.json",
+        "top-cities-realtime.json"
+    ]
+    return report_name_list
 end
-#agency names 
+#agency names
 function fetch_agency_names(necessity)
-    agency_dropdown_options_array = [];
+    agency_dropdown_options_array = []
     agency_name_list = [
         "All",
         "Agency-international-development",
-        "Agriculture", 
-        "Commerce", 
-        "Defense", 
-        "Education", 
-        "Energy", 
-        "Environmental-protection-agency", 
-        "Executive-office-president", 
-        "General-services-administration", 
-        "Health-human-services", 
-        "Homeland-security", 
-        "Housing-urban-development" ,
-        "Interior", 
-        "Justice", 
-        "Labor" ,
-        "National-aeronautics-space-administration", 
-        "National-archives-records-administration" ,
+        "Agriculture",
+        "Commerce",
+        "Defense",
+        "Education",
+        "Energy",
+        "Environmental-protection-agency",
+        "Executive-office-president",
+        "General-services-administration",
+        "Health-human-services",
+        "Homeland-security",
+        "Housing-urban-development",
+        "Interior",
+        "Justice",
+        "Labor",
+        "National-aeronautics-space-administration",
+        "National-archives-records-administration",
         "National-science-foundation",
         "Nuclear-regulatory-commission",
-        "Office-personnel-management", 
-        "Postal-service", 
-        "Small-business-administration", 
+        "Office-personnel-management",
+        "Postal-service",
+        "Small-business-administration",
         "Social-security-administration",
         "State",
         "Transportation",
         "Treasury",
-        "Veterans-affairs" 
-    ];
+        "Veterans-affairs"
+    ]
 
     if necessity == "agency_dropdown_options"
-    for agency in agency_name_list
-        agency_splitted_array = split(agency,"-");
-        agency = join(agency_splitted_array," ");
-        agency_dictionary = Dict("label"=>agency, "value"=>agency);
-        push!(agency_dropdown_options_array,agency_dictionary); # beware of push functions while coding 
-    end
+        for agency in agency_name_list
+            agency_splitted_array = split(agency, "-")
+            agency = join(agency_splitted_array, " ")
+            agency_dictionary = Dict("label" => agency, "value" => agency)
+            push!(agency_dropdown_options_array, agency_dictionary) # beware of push functions while coding
+        end
 
-    return agency_dropdown_options_array;
-else
-return agency_name_list;
-end
+        return agency_dropdown_options_array
+    else
+        return agency_name_list
+    end
 
 end
 
 
 
 function authorise_mongodb_connection()
-mongodb_authentication_stuff = Dict();
-mongodb_access_code = ENV["MONGODB_ACCESS_CODE"];
-mongodb_username = ENV["MONGODB_USERNAME"];
-mongodb_password = ENV["MONGODB_PASSWORD"];
+    mongodb_authentication_stuff = Dict()
+    mongodb_access_code = ENV["MONGODB_ACCESS_CODE"]
+    mongodb_username = ENV["MONGODB_USERNAME"]
+    mongodb_password = ENV["MONGODB_PASSWORD"]
 
-mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority";
-mongodb_connected_client = Mongoc.Client(mongodb_connection_uri);
-return mongodb_connected_client;
+    mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority"
+    mongodb_connected_client = Mongoc.Client(mongodb_connection_uri)
+    return mongodb_connected_client
 end
 
 
 
-function upload_data_mongodb(data_blob_array,agency_name)
-#handling data 
-# DATA BLOB ARRAY IS AN ARRAY OF ARRAYS CONTAINING DICTIONARY DATA
-site_report_data = data_blob_array[1];
-download_report_data = data_blob_array[2];
-allpagesrealtime_report_data = data_blob_array[3];
-toptrafficsources30days_report_data = data_blob_array[4];
-topcountriesrealtime_report_data = data_blob_array[5];
-topcitiesrealtime_report_data =  data_blob_array[6];
+function upload_data_mongodb(data_blob_array, agency_name)
+    #handling data
+    # DATA BLOB ARRAY IS AN ARRAY OF ARRAYS CONTAINING DICTIONARY DATA
+    site_report_data = data_blob_array[1]
+    download_report_data = data_blob_array[2]
+    allpagesrealtime_report_data = data_blob_array[3]
+    toptrafficsources30days_report_data = data_blob_array[4]
+    topcountriesrealtime_report_data = data_blob_array[5]
+    topcitiesrealtime_report_data = data_blob_array[6]
 
 
 
 
-# handling csv data /
-    
-
-#establish connection wtih the mongodb atlas
-println(site_report_data);
-println(download_report_data);
-println(allpagesrealtime_report_data);
-println(toptrafficsources30days_report_data);
-println(topcountriesrealtime_report_data);
-println(topcitiesrealtime_report_data);
-agency_data_to_be_uploaded = Dict("id"=>agency_name, "site-report-data"=>Mongoc.BSON(site_report_data), "download-report-data"=>Mongoc.BSON(download_report_data),"all-pages-realtime-report-data"=>Mongoc.BSON(allpagesrealtime_report_data),"top-traffic-sources-30-days-report-data"=>Mongoc.BSON(toptrafficsources30days_report_data),"top-countries-realtime-report-data"=>Mongoc.BSON(topcountriesrealtime_report_data),"top-cities-realtime-report-data"=>Mongoc.BSON(topcitiesrealtime_report_data));
-client_connection  = authorise_mongodb_connection();
-mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"];
+    # handling csv data /
 
 
+    #establish connection wtih the mongodb atlas
+    # println(site_report_data);
+    # println(download_report_data);
+    # println(allpagesrealtime_report_data);
+    # println(toptrafficsources30days_report_data);
+    # println(topcountriesrealtime_report_data);
+    # println(topcitiesrealtime_report_data);
+    agency_data_to_be_uploaded = Dict("id" => agency_name, "site-report-data" => Mongoc.BSON(site_report_data), "download-report-data" => Mongoc.BSON(download_report_data), "all-pages-realtime-report-data" => Mongoc.BSON(allpagesrealtime_report_data), "top-traffic-sources-30-days-report-data" => Mongoc.BSON(toptrafficsources30days_report_data), "top-countries-realtime-report-data" => Mongoc.BSON(topcountriesrealtime_report_data), "top-cities-realtime-report-data" => Mongoc.BSON(topcitiesrealtime_report_data))
+    client_connection = authorise_mongodb_connection()
+    mongodb_target_data_collection = client_connection["usa_gov_site_analytics"]["agencies_report_data"]
 
-exising_document_check = Mongoc.find_one(mongodb_target_data_collection,Mongoc.BSON(Dict("id"=>agency_name)));
 
-if isnothing(exising_document_check)
-Mongoc.insert_one(mongodb_target_data_collection,Mongoc.BSON(agency_data_to_be_uploaded));
-end
-# print(Mongoc.BSON(agency_site_json_data))
-# print(Mongoc.ping(client_connection))
+
+    exising_document_check = Mongoc.find_one(mongodb_target_data_collection, Mongoc.BSON(Dict("id" => agency_name)))
+
+    if isnothing(exising_document_check)
+        Mongoc.insert_one(mongodb_target_data_collection, Mongoc.BSON(agency_data_to_be_uploaded))
+    end
+    # print(Mongoc.BSON(agency_site_json_data))
+    # print(Mongoc.ping(client_connection))
 end
 
 
 function fetch_agency_data_from_api_and_upload_to_mongodb()
     # -----------------------------------------------------emptying the entire database here to ensure that new data is actively being fed into the db every now and then--------------------
-    mongodb_client_connection = authorise_mongodb_connection();
-    mongodb_entire_collection = mongodb_client_connection["usa_gov_site_analytics"]["agencies_report_data"];
-    empty!(mongodb_entire_collection);
+    mongodb_client_connection = authorise_mongodb_connection()
+    mongodb_entire_collection = mongodb_client_connection["usa_gov_site_analytics"]["agencies_report_data"]
+    empty!(mongodb_entire_collection)
     #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    agencies_list = fetch_agency_names("agency_name_list");
-    reports_list = fetch_report_names();
-    chosen_agency_name = "";
-    chosen_report_name = "";
-    usa_gov_api_key = ENV["USA_GOV_API_KEY"];
-    
-    http_headers_for_api_fetch = Dict("x-api-key"=>"$usa_gov_api_key");
+    agencies_list = fetch_agency_names("agency_name_list")
+    reports_list = fetch_report_names()
+    chosen_agency_name = ""
+    chosen_report_name = ""
+    usa_gov_api_key = ENV["USA_GOV_API_KEY"]
+
+    http_headers_for_api_fetch = Dict("x-api-key" => "$usa_gov_api_key")
     # println(length(agencies_list));
-    lowercase_agencies_list_excluding_all = [];
+    lowercase_agencies_list_excluding_all = []
     for agency in agencies_list
-    push!(lowercase_agencies_list_excluding_all,lowercase(agency));
+        push!(lowercase_agencies_list_excluding_all, lowercase(agency))
     end
-    lowercase_agencies_list_excluding_all = lowercase_agencies_list_excluding_all[2:end];    
-  
-  # println(agencies_list[2])
+    lowercase_agencies_list_excluding_all = lowercase_agencies_list_excluding_all[2:end]
+
+    # println(agencies_list[2])
     for num in 1:length(agencies_list)
-        data_blob_array = [];
-        data_is_csv = false; #checks for whether the requested data is csv or not 
-        make_http_requests = false;
+        data_blob_array = []
+        data_is_csv = false #checks for whether the requested data is csv or not
+        make_http_requests = false
 
 
         for report in reports_list
-            chosen_report_name = report;
-            lowercase_agency_name = lowercase(agencies_list[num]);
-            chosen_agency_name = lowercase_agency_name;
-            usa_gov_api_url = "";
-            usa_gov_http_url = "";
+            chosen_report_name = report
+            lowercase_agency_name = lowercase(agencies_list[num])
+            chosen_agency_name = lowercase_agency_name
+            usa_gov_api_url = ""
+            usa_gov_http_url = ""
 
-  
-           
-            
-            
+
+
+
+
 
 
             # different things for "all" and individual agencies
-            if (chosen_agency_name == "all" && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/reports/$chosen_report_name/data";
-                make_http_requests = false;
+            if (chosen_agency_name == "all" && (chosen_report_name in ["site", "download"]))
+                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/reports/$chosen_report_name/data"
+                make_http_requests = false
 
 
-            elseif(chosen_agency_name == "all" && (chosen_report_name in ["all-pages-realtime.csv","top-traffic-sources-30-days.json","top-countries-realtime.json","top-cities-realtime.json"]))
-                usa_gov_http_url = "https://analytics.usa.gov/data/live/$chosen_report_name";
-                make_http_requests = true;
+            elseif (chosen_agency_name == "all" && (chosen_report_name in ["all-pages-realtime.csv", "top-traffic-sources-30-days.json", "top-countries-realtime.json", "top-cities-realtime.json"]))
+                usa_gov_http_url = "https://analytics.usa.gov/data/live/$chosen_report_name"
+                make_http_requests = true
 
                 if chosen_report_name == "all-pages-realtime.csv"
-                    data_is_csv = true;
+                    data_is_csv = true
                 else
-                    data_is_csv = false;
-                end
-                
-                
-            elseif(chosen_agency_name  in lowercase_agencies_list_excluding_all && (chosen_report_name in ["site","download"]))
-                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data";
-                make_http_requests = false;
-            elseif(chosen_agency_name in lowercase_agencies_list_excluding_all && (chosen_report_name in ["all-pages-realtime.csv","top-traffic-sources-30-days.json","top-countries-realtime.json","top-cities-realtime.json"]))
-                usa_gov_http_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name";
-                make_http_requests = true;
-                if chosen_report_name == "all-pages-realtime.csv"
-                    data_is_csv = true;
-                else
-                    data_is_csv = false;
+                    data_is_csv = false
                 end
 
-                
+
+            elseif (chosen_agency_name in lowercase_agencies_list_excluding_all && (chosen_report_name in ["site", "download"]))
+                usa_gov_api_url = "https://api.gsa.gov/analytics/dap/v1.1/agencies/$chosen_agency_name/reports/$chosen_report_name/data"
+                make_http_requests = false
+            elseif (chosen_agency_name in lowercase_agencies_list_excluding_all && (chosen_report_name in ["all-pages-realtime.csv", "top-traffic-sources-30-days.json", "top-countries-realtime.json", "top-cities-realtime.json"]))
+                usa_gov_http_url = "https://analytics.usa.gov/data/$chosen_agency_name/$chosen_report_name"
+                make_http_requests = true
+                if chosen_report_name == "all-pages-realtime.csv"
+                    data_is_csv = true
+                else
+                    data_is_csv = false
+                end
+
+
             end
-            
 
-            if(data_is_csv && make_http_requests) 
 
-                requested_content = HTTP.request("GET",usa_gov_http_url);
-                requested_content_body = requested_content.body;
-                requested_content_body_string = String(requested_content.body);
-                # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function 
-                if length(requested_content_body_string) < 1 || occursin("\0",requested_content_body_string)
-                    requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
-                    push!(data_blob_array,requested_content); 
+            if (data_is_csv && make_http_requests)
+
+                requested_content = HTTP.request("GET", usa_gov_http_url)
+                requested_content_body = requested_content.body
+                requested_content_body_string = String(requested_content.body)
+                # handling errors when no data is returned and a nil string is being used as an argument within the Mongoc.BSON() function
+                if length(requested_content_body_string) < 1 || occursin("\0", requested_content_body_string)
+                    requested_content = [Dict("dummy_data_label" => "dummy", "dummy_data_value" => 1)] #*******************important
+                    push!(data_blob_array, requested_content)
 
                 else
-                returned_data_blob = CSV.File(requested_content_body) |> DataFrame;
-                returned_data_blob = convert_csv_data_to_json(returned_data_blob);
-                push!(data_blob_array,returned_data_blob);
+                    returned_data_blob = CSV.File(requested_content_body) |> DataFrame
+                    returned_data_blob = convert_csv_data_to_json(returned_data_blob)
+                    push!(data_blob_array, returned_data_blob)
                 end
 
 
             elseif (!data_is_csv && make_http_requests)
-                requested_content = HTTP.request("GET",usa_gov_http_url);
-                requested_content_body_string = String(requested_content.body);
-                    if length(requested_content_body_string) < 1 
-                        requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
-                        push!(data_blob_array,requested_content); 
-                    else
-                    returned_data_blob = JSON.Parser.parse(requested_content_body_string);
-                    push!(data_blob_array,returned_data_blob);
-                    end
+                requested_content = HTTP.request("GET", usa_gov_http_url)
+                requested_content_body_string = String(requested_content.body)
+                if length(requested_content_body_string) < 1
+                    requested_content = [Dict("dummy_data_label" => "dummy", "dummy_data_value" => 1)] #*******************important
+                    push!(data_blob_array, requested_content)
+                else
+                    returned_data_blob = JSON.Parser.parse(requested_content_body_string)
+                    push!(data_blob_array, returned_data_blob)
+                end
 
             elseif (!data_is_csv && !make_http_requests)
-                requested_content = HTTP.request("GET",usa_gov_api_url, http_headers_for_api_fetch);
-                requested_content_body_string = String(requested_content.body);
-                
-                if length(requested_content_body_string) < 1 
-                    requested_content = [Dict("dummy_data_label"=>"dummy","dummy_data_value"=>1)]; #*******************important
-                    push!(data_blob_array,requested_content); 
+                requested_content = HTTP.request("GET", usa_gov_api_url, http_headers_for_api_fetch)
+                requested_content_body_string = String(requested_content.body)
+
+                if length(requested_content_body_string) < 1
+                    requested_content = [Dict("dummy_data_label" => "dummy", "dummy_data_value" => 1)] #*******************important
+                    push!(data_blob_array, requested_content)
                 else
-                    returned_data_blob = JSON.Parser.parse(requested_content_body_string); 
-                    push!(data_blob_array, returned_data_blob);
+                    returned_data_blob = JSON.Parser.parse(requested_content_body_string)
+                    push!(data_blob_array, returned_data_blob)
                 end
             end
-            
+
         end
         #no need to create a file since data base have been connected
         #newfile = open("./agencies_site_report_data/$chosen_agency_name-site-report.json","w");
         # write(newfile,JSON.json(returned_data_blob));
         # close(newfile);
-        upload_data_mongodb(data_blob_array,chosen_agency_name);
+        upload_data_mongodb(data_blob_array, chosen_agency_name)
     end
 end
 
@@ -290,8 +290,8 @@ end
 
 
 if UPLOAD_DATA_TO_MONGODB
-fetch_agency_data_from_api_and_upload_to_mongodb();
-UPLOAD_DATA_TO_MONGODB = false;
+    fetch_agency_data_from_api_and_upload_to_mongodb()
+    UPLOAD_DATA_TO_MONGODB = false
 end
 # upload_data_mongodb()
 
