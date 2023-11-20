@@ -25,7 +25,7 @@ ALL_PAGES_REALTIME_DATA_DICT = fetch_all_pages_realtime_report_data_from_mongodb
 TOP_COUNTRIES_REALTIME_DATA_DICT = fetch_top_countries_realtime_report_data_from_mongodb(lowercased_agency_name)
 TOP_CITIES_REALTIME_DATA_DICT = fetch_top_cities_realtime_report_data_from_mongodb(lowercased_agency_name)
 DOWNLOAD_REPORT_DATA = fetch_download_report_data_from_mongodb(lowercased_agency_name)
-TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercase_agency_name)
+TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercased_agency_name)
 #------------------------------------------------LARGE DATA SETS--------------------------------------------
 
 #-----------------------------------FINALISED DATA VARIABLES VALUES---------------------------------

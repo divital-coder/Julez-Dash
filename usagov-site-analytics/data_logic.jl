@@ -45,9 +45,10 @@ function top_domain_data(document_data, agency)
     number_of_objects = length(keys(document_data_site_report))
     # println(document_data["site-report-data"]);
     for num in 0:number_of_objects-1
-        entry_domain = document_data_site_report[num]["domain"]
-        entry_date = document_data_site_report[num]["date"]
-        entry_domain_visit_count = document_data_site_report[num]["visits"]
+        # println("this is the data " ,document_data_site_report);
+        entry_domain = document_data_site_report["$num"]["domain"]
+        entry_date = document_data_site_report["$num"]["date"]
+        entry_domain_visit_count = document_data_site_report["$num"]["visits"]
 
 
 
@@ -80,13 +81,17 @@ function top_domain_data(document_data, agency)
     priority_data_dict_array_now = []
 
     number_of_object_in_realtime_data_key = length(document_data)
+    
+    if haskey(document_data["all-pages-realtime-report-data"],"dummy_data_value")
+        push!(priority_data_dict_array_now,Dict("domain"=>"dummy_domain_value","visits"=>0))
+    else
     for num in 0:number_of_object_in_realtime_data_key
-        entry_page_title = document_data["all-pages-realtime-report-data"][num]["page_title"]
-        entry_page_domain = document_data["all-pages-realtime-report-data"][num]["page"]
-        entry_page_visit_count = document_data["all-pages-realtime-report-data"][num]["active_visitors"]
+        entry_page_title = document_data["all-pages-realtime-report-data"]["$num"]["page_title"]
+        entry_page_domain = document_data["all-pages-realtime-report-data"]["$num"]["page"]
+        entry_page_visit_count = document_data["all-pages-realtime-report-data"]["$num"]["active_visitors"]
         push!(priority_data_dict_array_now, Dict("domain" => entry_page_title, "visits" => entry_page_visit_count))
     end
-
+end
 
     top_domain_data_dict["monthly_domain_data"] = priority_data_dict_array_monthly
     top_domain_data_dict["weekly_domain_data"] = priority_data_dict_array_weekly
@@ -108,7 +113,7 @@ function fetch_site_report_data_from_mongodb(which_agency_data)
             break
         end
     end
-
+    close(client_connection)
     return agency_top_domain_data  #here we are going to be getting  #returnds dict->arrays->dicts
 end
 
@@ -130,7 +135,7 @@ function fetch_all_pages_realtime_report_data_from_mongodb(which_agency_data)
             break
         end
     end
-    return people_on_all_sites_report #$dict with data key set to the array of dicts;
+    return people_on_all_sites_right_now_data #$dict with data key set to the array of dicts;
 end
 
 function fetch_top_traffic_sources_30_days_report_data_from_mongodb(which_agency_data)
@@ -158,6 +163,7 @@ function fetch_top_cities_realtime_report_data_from_mongodb(which_agency_data)
             top_cities_realtime_report_data["data"] = document["top-cities-realtime-report-data"]
         end
     end
+    close(client_connection)
     return top_cities_realtime_report_data
 end
 
@@ -170,6 +176,7 @@ function fetch_download_report_data_from_mongodb(which_agency_data)
             download_report_data["data"] = document["download-report-data"]
         end
     end
+    close(client_connection)
     return download_report_data
 end
 
@@ -182,5 +189,6 @@ function fetch_top_countries_realtime_report_data_from_mongodb(which_agency_data
             top_countries_realtime_report_data["data"] = document["top-countries-realtime-report-data"]
         end
     end
+    close(client_connection)
     return top_countries_realtime_report_data
 end

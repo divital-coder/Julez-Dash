@@ -137,6 +137,7 @@ function upload_data_mongodb(data_blob_array, agency_name)
 
 
     #establish connection wtih the mongodb atlas
+
     # println(site_report_data);
     # println(download_report_data);
     # println(allpagesrealtime_report_data);
@@ -244,8 +245,10 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
                     push!(data_blob_array, requested_content)
 
                 else
-                    returned_data_blob = CSV.File(requested_content_body) |> DataFrame
+
+                    returned_data_blob = CSV.File(IOBuffer(requested_content_body_string)) |> DataFrame
                     returned_data_blob = convert_csv_data_to_json(returned_data_blob)
+                    
                     push!(data_blob_array, returned_data_blob)
                 end
 
@@ -281,6 +284,7 @@ function fetch_agency_data_from_api_and_upload_to_mongodb()
         # close(newfile);
         upload_data_mongodb(data_blob_array, chosen_agency_name)
     end
+    # close(mongodb_client_connection)
 end
 
 
