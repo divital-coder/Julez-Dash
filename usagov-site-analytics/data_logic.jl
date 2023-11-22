@@ -3,7 +3,34 @@ using Pkg;
 Pkg.add(["DotEnv", "Mongoc", "DataFrames", "JSON"]);
 using Mongoc, Dates, JSON;
 
+
+##################################################################################################################
+#                                  OBJECT ORIENTED PROGRAMMIGN BEGINS
+
+#environment variables
+struct Environment_variable_struct
+    env_var_instance::String
+end
+
+get_environment_variables(object::Environment_variable_struct, env_variable_array::Vector{String}) = begin
+    environment_variable_dict_array::Vector{Dict{String,Any}} = Vector{Dict{String,Any}}()
+    for env_var_name in env_variable_array
+        push!(environment_variable_dict_array, Dict(env_var_name => ENV[env_var_name]))
+    end
+    return environment_variable_dict_array
+end
+
+
+
+
+#data fetch from api and urls
+
+
+
+#################################################################################################################
 # configuring dot env for env vars
+
+
 
 # connecting to database as a client
 function authorise_mongodb_connection()
@@ -50,7 +77,7 @@ function top_domain_data(document_data, agency)
     for num in 0:number_of_objects-1
         # println("this is the data " ,document_data_site_report);
         #this right here from the mongodb database instance seems to contain Dict("string numbers"=>Dict("domain"=>"something","visits"=>"something"))
-        println(document_data_site_report);
+        println(document_data_site_report)
         entry_domain = document_data_site_report["$num"][1]["domain"]
         entry_date = document_data_site_report["$num"][2]["date"]
         entry_domain_visit_count = document_data_site_report["$num"][3]["visits"]
@@ -86,17 +113,17 @@ function top_domain_data(document_data, agency)
     priority_data_dict_array_now = []
 
     number_of_object_in_realtime_data_key = length(document_data)
-    
-    if haskey(document_data["all-pages-realtime-report-data"],"dummy_data_value")
-        push!(priority_data_dict_array_now,Dict("domain"=>"dummy_domain_value","visits"=>0))
+
+    if haskey(document_data["all-pages-realtime-report-data"], "dummy_data_value")
+        push!(priority_data_dict_array_now, Dict("domain" => "dummy_domain_value", "visits" => 0))
     else
-    for num in 0:number_of_object_in_realtime_data_key
-        entry_page_title = document_data["all-pages-realtime-report-data"]["$num"]["page_title"]
-        entry_page_domain = document_data["all-pages-realtime-report-data"]["$num"]["page"]
-        entry_page_visit_count = document_data["all-pages-realtime-report-data"]["$num"]["active_visitors"]
-        push!(priority_data_dict_array_now, Dict("domain" => entry_page_title, "visits" => entry_page_visit_count))
+        for num in 0:number_of_object_in_realtime_data_key
+            entry_page_title = document_data["all-pages-realtime-report-data"]["$num"]["page_title"]
+            entry_page_domain = document_data["all-pages-realtime-report-data"]["$num"]["page"]
+            entry_page_visit_count = document_data["all-pages-realtime-report-data"]["$num"]["active_visitors"]
+            push!(priority_data_dict_array_now, Dict("domain" => entry_page_title, "visits" => entry_page_visit_count))
+        end
     end
-end
 
     top_domain_data_dict["monthly_domain_data"] = priority_data_dict_array_monthly
     top_domain_data_dict["weekly_domain_data"] = priority_data_dict_array_weekly
@@ -106,8 +133,8 @@ end
 
 
 
-function fetch_site_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_site_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usa_gov_site_analytics"]["agencies_report_data"]
     agency_top_domain_data = nothing
     # weekly
@@ -130,8 +157,8 @@ end
 
 # data for right pane
 # right pane first section
-function fetch_all_pages_realtime_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_all_pages_realtime_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usa_gov_site_analytics"]["agencies_report_data"]
     people_on_all_sites_right_now_data = Dict()
     for document in mongodb_target_data_collection
@@ -144,8 +171,8 @@ function fetch_all_pages_realtime_report_data_from_mongodb(which_agency_data,mon
     return people_on_all_sites_right_now_data #$dict with data key set to the array of dicts;
 end
 
-function fetch_top_traffic_sources_30_days_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_top_traffic_sources_30_days_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usa_gov_site_analytics"]["agencies_report_data"]
     top_traffic_sources_30_days_report_data = Dict()
     for document in mongodb_target_data_collection
@@ -154,15 +181,15 @@ function fetch_top_traffic_sources_30_days_report_data_from_mongodb(which_agency
             break
         end
     end
-    
+
     return top_traffic_sources_30_days_report_data
 end
 
 
 
 # total visits past month : site-report-data => visits
-function fetch_top_cities_realtime_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_top_cities_realtime_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usa_gov_site_analytics"]["agencies_report_data"]
     top_cities_realtime_report_data = Dict()
     for document in mongodb_target_data_collection
@@ -170,12 +197,12 @@ function fetch_top_cities_realtime_report_data_from_mongodb(which_agency_data,mo
             top_cities_realtime_report_data["data"] = document["top-cities-realtime-report-data"]
         end
     end
-    
+
     return top_cities_realtime_report_data
 end
 
-function fetch_download_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_download_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usaa_gov_site_analytics"]["agencies_report_data"]
     download_report_data = Dict()
     for document in mongodb_target_data_collection
@@ -183,12 +210,12 @@ function fetch_download_report_data_from_mongodb(which_agency_data,mongodb_clien
             download_report_data["data"] = document["download-report-data"]
         end
     end
-    
+
     return download_report_data
 end
 
-function fetch_top_countries_realtime_report_data_from_mongodb(which_agency_data,mongodb_client)
-    
+function fetch_top_countries_realtime_report_data_from_mongodb(which_agency_data, mongodb_client)
+
     mongodb_target_data_collection = mongodb_client["usa_gov_site_analytics"]["agencies_report_data"]
     top_countries_realtime_report_data = Dict()
     for document in mongodb_target_data_collection
@@ -196,6 +223,6 @@ function fetch_top_countries_realtime_report_data_from_mongodb(which_agency_data
             top_countries_realtime_report_data["data"] = document["top-countries-realtime-report-data"]
         end
     end
-    
+
     return top_countries_realtime_report_data
 end
