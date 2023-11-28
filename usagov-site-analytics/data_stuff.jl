@@ -2,9 +2,9 @@
 
 
 using Pkg;
-Pkg.add(["DotEnv", "HTTP", "JSON", "Mongoc", "CSV", "DataFrames"]);
+Pkg.add(["DotEnv", "HTTP", "JSON", "Mongoc", "CSV", "DataFrames","BSON","ODBC"]);
 
-using DotEnv, HTTP, JSON, CSV, Mongoc, DataFrames;
+using DotEnv, HTTP, JSON, CSV, Mongoc, DataFrames,BSON,ODBC;
 # using Dates;
 # page page_title active_visitors
 
@@ -31,6 +31,9 @@ function format_url_for_data_request(agency_name, report_name)
         return "https://analytics.usa.gov/data/$agency_name/$report_name"
     end
 end
+
+
+
 
 #############################################################################
 
@@ -159,44 +162,19 @@ end
 
 
 
-
-
-struct Mongodb_struct
-    mongodb_username
-    mongodb_password
-    mongodb_database_name
-    mongodb_collection_name
+struct Microsoft_sql_database_struct
+    ms_sql_database_name
+    ms_sql_server_name
+    ms_sql_admin_username
+    ms_sql_admin_password
+    ms_sql_connection_string
+end
+connect_to_ms_sql_database(object::Microsoft_sql_database_struct) = begin
+    connected_client = ODBC.Connection(object.ms_sql_connection_string)
+    return connected_client
 end
 
-connect_to_mongodb_atlas(object::Mongodb_struct) = begin
-    mongodb_username = object.mongodb_username
-    mongodb_password = object.mongodb_password
-    mongodb_connection_uri = "mongodb+srv://$mongodb_username:$mongodb_password@cluster0.bnbnwjz.mongodb.net/?retryWrites=true&w=majority"
-    mongodb_client = Mongoc.Client(mongodb_connection_uri)
-    return mongodb_client
-end
 
-disconnect_mongodb_atlas(object::Mongodb_struct, mongo_client) = begin
-    Mongoc.Disconnect!(mongo_client)
-end
-
-upload_data_to_mongodb_atlas(object::Mongodb_struct, mongo_client, data) = begin
-    #data here is an array of dicts with agency key with array of dicts
-    mongodb_collection = mongo_client[object.mongodb_database_name][object.mongodb_collection_name]
-    println(length(data))
-    for agency_data_dict in data
-        for (key, value) in agency_data_dict
-            existing_agency_document_check = Mongoc.find_one(mongodb_collection, Mongoc.BSON(Dict("id" => key)))
-            if isnothing(existing_agency_document_check)
-                data_to_be_uploaded = Mongoc.BSON(agency_data_dict)
-                Mongoc.insert_one(mongodb_collection, data_to_be_uploaded)
-            end
-        end
-    end
-end
-empty_data_from_mongodb_collection(object::Mongodb_struct, client) = begin
-    empty!(client[object.mongodb_database_name][object.mongodb_collection_name])
-end
 
 #for site report  ["domain","visits","date"]
 #for download report ["page",page_title","total_events","Date"]
@@ -212,9 +190,9 @@ end
 #INSTANTIATING structures
 
 current_project_environment_variables_object = Environment_variable_struct([])
-get_environment_variables(current_project_environment_variables_object, ["MONGODB_USERNAME", "MONGODB_PASSWORD", "USA_GOV_API_KEY"])
-mongodb_username_env = current_project_environment_variables_object.environment_variable_dict_array[1]["MONGODB_USERNAME"]
-mongodb_password_env = current_project_environment_variables_object.environment_variable_dict_array[2]["MONGODB_PASSWORD"]
+get_environment_variables(current_project_environment_variables_object, ["MS_SQL_USERNAME", "MS_SQL_PASSWORD", "USA_GOV_API_KEY"])
+ms_sql_username_env = current_project_environment_variables_object.environment_variable_dict_array[1]["MS_SQL_USERNAME"]
+ms_sql_password_env = current_project_environment_variables_object.environment_variable_dict_array[2]["MS_SQL_PASSWORD"]
 usa_gov_api_key_env = current_project_environment_variables_object.environment_variable_dict_array[3]["USA_GOV_API_KEY"]
 agency_name_list = [
     "All",
@@ -275,12 +253,11 @@ set_dataframe_dict_array(request_dataframe_dict_array_object, string_data_dict_a
 
 
 #uploading to database stuff
-mongodb_object = Mongodb_struct(mongodb_username_env, mongodb_password_env, "usa_gov_site_analytics", "agencies_report_data")
-mongodb_connected_client = connect_to_mongodb_atlas(mongodb_object)
-empty_data_from_mongodb_collection(mongodb_object, mongodb_connected_client)
-upload_data_to_mongodb_atlas(mongodb_object, mongodb_connected_client, request_dataframe_dict_array_object.dataframe_dict_array)
-
-
+ms_database_name = "usa_gov_site_analytics"
+ms_server_name = "usa-gov-site-analytics-database-server.database.windows.net"
+ms_sql_connection_string = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:usa-gov-site-analytics-database-server.database.windows.net,1433;Database=usa_gov_site_analytics;Uid=$ms_sql_username_env;Pwd=$ms_sql_password_env;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+ms_sql_database_object = Microsoft_sql_database_struct(ms_database_name, ms_server_name, ms_sql_username_env, ms_sql_password_env, ms_sql_connection_string)
+connected_client = connect_to_ms_sql_database(ms_sql_database_object)
 
 
 

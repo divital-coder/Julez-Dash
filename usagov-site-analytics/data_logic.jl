@@ -6,13 +6,13 @@ using Mongoc, Dates, JSON;
 
 ##################################################################################################################
 #                                  OBJECT ORIENTED PROGRAMMIGN BEGINS
-
+DotEnv.config()
 #environment variables
 struct Environment_variable_struct
-    env_var_instance::String
+    env_var_instance
 end
 
-get_environment_variables(object::Environment_variable_struct, env_variable_array::Vector{String}) = begin
+get_environment_variables(object::Environment_variable_struct, env_variable_array) = begin
     environment_variable_dict_array::Vector{Dict{String,Any}} = Vector{Dict{String,Any}}()
     for env_var_name in env_variable_array
         push!(environment_variable_dict_array, Dict(env_var_name => ENV[env_var_name]))
