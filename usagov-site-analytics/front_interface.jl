@@ -3,37 +3,19 @@ Pkg.add("Dash"); #this enables us to launch our web app
 Pkg.add("PlotlyJS"); #this enables us to create plots and graphs
 Pkg.update();
 
-include("./data_stuff.jl");
-include("./data_logic.jl");
-include("./front_data_manipulation.jl");
+include("./data_retrieve.jl")
+include("./front_data_manipulation.jl")
 using Dash;
 using PlotlyJS;
 
 #for dropdowns u need an options attribute ,and that attribute needs  an array of dictionary with key value pairs of label and value
 # this functions returns a value which the user have chosen from the dropdown menu
-function return_agency_from_the_dropdown(agency_name)
-    lowercased_agency_name = lowercase(agency_name)
-    return lowercased_agency_name
-end
-
-mongodb_client = authorise_mongodb_connection()
-
-# GLOBAL VARAIBLES
-lowercased_agency_name = "all";
 #--------------------------------------------LARGE DATA SETS--------------------------------------
-TOP_DOMAIN_DATA_DICT = fetch_site_report_data_from_mongodb(lowercased_agency_name,mongodb_client) #this returns a dictionary with keys "monthly_domain_data", "weekly_domain_data", "now_domain_data" which are arrays of dictionaryies with key "domain", "visits"
-ALL_PAGES_REALTIME_DATA_DICT = fetch_all_pages_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
-TOP_COUNTRIES_REALTIME_DATA_DICT = fetch_top_countries_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
-TOP_CITIES_REALTIME_DATA_DICT = fetch_top_cities_realtime_report_data_from_mongodb(lowercased_agency_name,mongodb_client )
-DOWNLOAD_REPORT_DATA = fetch_download_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
-TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercased_agency_name,mongodb_client)
+
 #------------------------------------------------LARGE DATA SETS--------------------------------------------
 
 #-----------------------------------FINALISED DATA VARIABLES VALUES---------------------------------
-FINAL_TOP_DOMAIN_DATA_DICT = finalise_top_domains(TOP_DOMAIN_DATA_DICT) #returns a dictionary of dictionary -> arrays 
-FINAL_WEEKLY_DOMAIN_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_week"]
-FINAL_MONTHLY_DOMAIN_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_month"]
-FINAL_NOW_PAGES_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_now"]
+
 #-----------------------------------FINALISED DATA VARIABLES VALUES------------------------------------
 #global variables
 
@@ -42,17 +24,16 @@ FINAL_NOW_PAGES_DATA = FINAL_TOP_DOMAIN_DATA_DICT["final_data_dict_now"]
 
 
 
-main_content_country_map = nothing;
-main_content_city_map = nothing;
-
 
 
 
 tab_styling = Dict("background" => "linear-gradient(90deg, var(#fbc2eb, #f6d365), var(#a6c1ee, #fda085) 51%, var(#fbc2eb, #f6d365)) var(--x, 0)/ 200%;")
 
 
-header_agency_dropdown_options = fetch_agency_names("agency_dropdown_options");
-# header_agency_dropdown_options = [Dict("label" => "apple", "value" => "apple")];
+# header_agency_dropdown_options = fetch_agency_names("agency_dropdown_options");
+
+header_agency_dropdown_options = create_header_agency_drop_down_dict_array(capitalised_agency_names_array)
+# println(header_agency_dropdown_options)
 
 #here we are simply storting and creating the html and css layout for our app
 
@@ -128,35 +109,23 @@ Application.layout = frontend_layout;
 
 # callbacks related to our application
 callback!(Application, Output("showthis", "children"), Input("agency_dropdown", "value")) do selected_agency_option
-    lowercased_agency_name = return_agency_from_the_dropdown(selected_agency_option)
-    # need to call the function that fetches data for the relevant agency
-    TOP_DOMAIN_DATA_DICT = fetch_site_report_data_from_mongodb(lowercased_agency_name) #this returns a dictionary with keys "monthly_domain_data", "weekly_domain_data", "now_domain_data" which are arrays of dictionaryies with key "domain", "visits"
-    ALL_PAGES_REALTIME_DATA_DICT = fetch_all_pages_realtime_report_data_from_mongodb(lowercased_agency_name)
-    TOP_COUNTRIES_REALTIME_DATA_DICT = fetch_top_countries_realtime_report_data_from_mongodb(lowercased_agency_name)
-    TOP_CITIES_REALTIME_DATA_DICT = fetch_top_cities_realtime_report_data_from_mongodb(lowercased_agency_name)
-    DOWNLOAD_REPORT_DATA = fetch_download_report_data_from_mongodb(lowercased_agency_name)
-    TOP_TRAFFIC_SOURCES_30_DAYS_REPORT_DATA = fetch_top_traffic_sources_30_days_report_data_from_mongodb(lowercase_agency_name)
+    data = get_domain_data(selected_agency_option, dataframe_dict_array)
+
+    #instantiating final stuff
+    top_domains_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
+    set_properties_top_domains(top_domains_display_data_object, data)
+    final_top_domain_week_data(top_domains_display_data_object)
 end
 
 
 
 
 callback!(Application, Output("left_pane_graphs", "children"), Input("left_pane_tabs", "value")) do tab_value
-    if tab_value == "weekly_domains"
-        FINAL_WEEKLY_DOMAIN_DATA = finalise_top_domains_past_week(TOP_DOMAIN_DATA_DICT["weekly_domain_data"])
-        dataset_data_frame = FINAL_WEEKLY_DOMAIN_DATA |> DataFrame
-        return dcc_graph(figure=plot(bar(dataset_data_frame, x=:domain, y=:visits, orientation="h")))
 
-    elseif tab_value == "monthly_domains"
-        FINAL_MONTHLY_DOMAIN_DATA = finalise_top_domains_past_month(TOP_DOMAIN_DATA_DICT["monthly_domain_data"])
-    elseif tab_value == "pages_now"
-        FINAL_NOW_PAGES_DATA = finalise_top_pages_now(TOP_DOMAIN_DATA_DICT["now_domain_data"])
-    end
 end
 
 
 
-destroy_mongodb_client(mongodb_client)
 run_server(Application, "0.0.0.0", debug=true);
 
 

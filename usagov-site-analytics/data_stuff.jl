@@ -2,14 +2,15 @@
 
 
 using Pkg;
-Pkg.add(["DotEnv", "HTTP", "JSON", "Mongoc", "CSV", "DataFrames","BSON","ODBC"]);
+Pkg.add(["DotEnv", "HTTP", "JSON", "Mongoc", "CSV", "DataFrames", "BSON"]);
 
-using DotEnv, HTTP, JSON, CSV, Mongoc, DataFrames,BSON,ODBC;
+using DotEnv, HTTP, JSON, CSV, Mongoc, DataFrames, BSON;
 # using Dates;
 # page page_title active_visitors
 
 #configuring environment variables
 DotEnv.config();
+# ODBC.adddriver("ODBC Driver 18 for SQL Server");
 
 
 #global vars
@@ -104,6 +105,7 @@ end
 
 
 mutable struct Requested_dataframe_dict_array
+    string_data_dict_array
     dataframe_dict_array
 end
 
@@ -120,6 +122,7 @@ fetch_string_data(object::Requested_dataframe_dict_array, agency_names_array, re
         end
         push!(string_data_dict_array, agency_dict)
     end
+    object.string_data_dict_array = string_data_dict_array
     return string_data_dict_array
 end
 
@@ -142,39 +145,77 @@ set_dataframe_dict_array(object::Requested_dataframe_dict_array, string_data_dic
                 dataframe_dict[key] = value
             else
                 if key == "all-pages-realtime.csv"
-                    dataframe_dict[key] = first(parse_csv_data(value), 5)
+                    dataframe_dict[key] = first(parse_csv_data(value), 50)
                 elseif !(key in ["site", "download"])
                     dataframe_dict[key] = parse_json_data(value)
                     data = dataframe_dict[key]
-                    dataframe_dict[key] = first(data[!, :data] |> DataFrame, 5)
+                    dataframe_dict[key] = first(data[!, :data] |> DataFrame, 50)
 
                 elseif (key in ["site", "download"])
-                    dataframe_dict[key] = first(parse_json_data(value), 5)
+                    dataframe_dict[key] = first(parse_json_data(value), 50)
                 end
             end
         end
         push!(object.dataframe_dict_array, dataframe_dict)
     end
+    return object.dataframe_dict_array
 end
 
 
 
 
 
-
-struct Microsoft_sql_database_struct
-    ms_sql_database_name
-    ms_sql_server_name
-    ms_sql_admin_username
-    ms_sql_admin_password
-    ms_sql_connection_string
-end
-connect_to_ms_sql_database(object::Microsoft_sql_database_struct) = begin
-    connected_client = ODBC.Connection(object.ms_sql_connection_string)
-    return connected_client
+struct Mongodb_stuff
+    mongodb_username
+    mongodb_password
+    mongodb_connection_uri
+    mongodb_database_name
+    mongodb_collection_name
 end
 
 
+
+initiate_connection(object::Mongodb_stuff) = begin
+    client = Mongoc.Client(object.mongodb_connection_uri)
+    return client
+end
+
+
+
+empty_mongodb_collection(object::Mongodb_stuff, client) = begin
+    empty!(client[object.mongodb_database_name][object.mongodb_collection_name])
+end
+upload_data_to_mongodb(object::Mongodb_stuff, client, data) = begin
+    mongodb_collection = client[object.mongodb_database_name][object.mongodb_collection_name]
+    for agency_dict in data
+        agency_dict = Mongoc.BSON(agency_dict)
+        existing_document_check = Mongoc.find_one(mongodb_collection, Mongoc.BSON(Dict("id" => agency_dict["id"])))
+        if isnothing(existing_document_check)
+            Mongoc.insert_one(mongodb_collection, Mongoc.BSON(agency_dict))
+        end
+    end
+end
+
+
+
+retrieve_data_from_mongodb(object::Mongodb_stuff, client) = begin
+    agency_dict_array = []
+    for document in client[object.mongodb_database_name][object.mongodb_collection_name]
+        agency_dict = Dict()
+        for (key, value) in document
+            if key != "_id"
+                agency_dict[key] = value
+            end
+        end
+        push!(agency_dict_array, agency_dict)
+    end
+    return agency_dict_array
+end
+
+
+disband_connection(object::Mongodb_stuff, client) = begin
+    Mongoc.destroy!(client)
+end
 
 #for site report  ["domain","visits","date"]
 #for download report ["page",page_title","total_events","Date"]
@@ -190,10 +231,13 @@ end
 #INSTANTIATING structures
 
 current_project_environment_variables_object = Environment_variable_struct([])
-get_environment_variables(current_project_environment_variables_object, ["MS_SQL_USERNAME", "MS_SQL_PASSWORD", "USA_GOV_API_KEY"])
-ms_sql_username_env = current_project_environment_variables_object.environment_variable_dict_array[1]["MS_SQL_USERNAME"]
-ms_sql_password_env = current_project_environment_variables_object.environment_variable_dict_array[2]["MS_SQL_PASSWORD"]
+get_environment_variables(current_project_environment_variables_object, ["MONGODB_USERNAME", "MONGODB_PASSWORD", "USA_GOV_API_KEY", "MONGODB_CONNECTION_URI", "MONGODB_DATABASE_NAME", "MONGODB_COLLECTION_NAME"])
+mongodb_username_env = current_project_environment_variables_object.environment_variable_dict_array[1]["MONGODB_USERNAME"]
+mongodb_password_env = current_project_environment_variables_object.environment_variable_dict_array[2]["MONGODB_PASSWORD"]
 usa_gov_api_key_env = current_project_environment_variables_object.environment_variable_dict_array[3]["USA_GOV_API_KEY"]
+mongodb_connection_uri = current_project_environment_variables_object.environment_variable_dict_array[4]["MONGODB_CONNECTION_URI"]
+mongodb_database_name = current_project_environment_variables_object.environment_variable_dict_array[5]["MONGODB_DATABASE_NAME"]
+mongodb_collection_name = current_project_environment_variables_object.environment_variable_dict_array[6]["MONGODB_COLLECTION_NAME"]
 agency_name_list = [
     "All",
     "Agency-international-development",
@@ -239,32 +283,24 @@ report_name_list = [
 report_names_object = Initialise_report_names_array(report_name_list)
 lowercased_report_names_array = lowercase_report_names(report_names_object)
 
-request_dataframe_dict_array_object = Requested_dataframe_dict_array([])
+request_dataframe_dict_array_object = Requested_dataframe_dict_array([], [])
 string_data_dict_array = fetch_string_data(request_dataframe_dict_array_object, lowercased_agency_names_array, lowercased_report_names_array, usa_gov_api_key_env)
-set_dataframe_dict_array(request_dataframe_dict_array_object, string_data_dict_array)
-
-
-
-
-
-
 
 
 
 
 #uploading to database stuff
-ms_database_name = "usa_gov_site_analytics"
-ms_server_name = "usa-gov-site-analytics-database-server.database.windows.net"
-ms_sql_connection_string = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:usa-gov-site-analytics-database-server.database.windows.net,1433;Database=usa_gov_site_analytics;Uid=$ms_sql_username_env;Pwd=$ms_sql_password_env;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
-ms_sql_database_object = Microsoft_sql_database_struct(ms_database_name, ms_server_name, ms_sql_username_env, ms_sql_password_env, ms_sql_connection_string)
-connected_client = connect_to_ms_sql_database(ms_sql_database_object)
-
-
-
-
+mongodb_object = Mongodb_stuff(mongodb_username_env, mongodb_password_env, mongodb_connection_uri, mongodb_database_name, mongodb_collection_name)
+mongo_client = initiate_connection(mongodb_object)
+empty_mongodb_collection(mongodb_object, mongo_client)
+upload_data_to_mongodb(mongodb_object, mongo_client, string_data_dict_array)
+disband_connection(mongodb_object, mongo_client)
 
 
 
 
 
 ################################Functional code#############################################################
+
+
+
