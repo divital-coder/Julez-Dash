@@ -188,7 +188,7 @@ end
 upload_data_to_mongodb(object::Mongodb_stuff, client, data) = begin
     mongodb_collection = client[object.mongodb_database_name][object.mongodb_collection_name]
     for agency_dict in data
-        agency_dict = Mongoc.BSON(agency_dict)
+        # agency_dict = Mongoc.BSON(agency_dict)
         existing_document_check = Mongoc.find_one(mongodb_collection, Mongoc.BSON(Dict("id" => agency_dict["id"])))
         if isnothing(existing_document_check)
             Mongoc.insert_one(mongodb_collection, Mongoc.BSON(agency_dict))
