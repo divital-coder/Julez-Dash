@@ -21,9 +21,7 @@ final_top_domain_week_data(object::top_domains_display_data) = begin
 
     current_date = Dates.today()
     past_week_date = current_date - Dates.Day(6)
-    for row in eachrow(top_domain_site_data_frame)
-        println(row.domain, row.visits)
-    end
+   return first(top_domain_site_data_frame,5)
 end
 # final_top_domain_month_data()
 # final_top_domain_now_data()

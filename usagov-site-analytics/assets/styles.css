@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@200&display=swap');
- :root {
+@import url('https://fonts.googleapis.com/css2?family=Gasoek+One&family=Nunito:wght@600&family=Rubik+Bubbles&display=swap');
+:root {
     --c1: #ffecd2;
     --c2: #fcb69f;
     --c3: #fbc2eb;
@@ -25,11 +26,12 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Raleway', sans-serif;
+    font-family: 'Nunito', sans-serif;
     /* background-color:#FFFBF5 ; */
     color: black;
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
+    /* background-color : #CBE4DE; */
     background: linear-gradient(90deg, var(--c1, #f6d365), var(--c2, #fda085) 51%, var(--c1, #f6d365)) var(--x, 0)/ 200%;
     /* background: #FFABAB; */
 }
@@ -41,13 +43,14 @@ body {
 
 .site_heading {
     font-size: 1.7rem;
-    font-weight: bolder;
+    font-weight: 100;
+
 }
 
 .content_header {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content:space-between;
     align-items: center;
     /* background-color: #F7EFE5; */
     margin: 0;
@@ -68,7 +71,7 @@ body {
 }
 
 #agency_dropdown {
-    min-width: 50rem;
+    min-width: 30rem;
     box-shadow: none;
     font-size: large;
 }
@@ -117,8 +120,10 @@ body {
     flex: 2;
     margin: 10px;
     padding: 10px;
-    border: 2px solid grey;
+    border: 3px solid grey;
     border-radius: 12px;
+
+    color : black;
     /* background : linear-gradient(20deg, var(--c3, #f6d365), var(--c4, #fda085) 51%, var(--c3, #f6d365)) var(--x, 0)/ 200%; */
 }
 
@@ -126,7 +131,8 @@ body {
     font-size: 1.1rem;
     border-radius: 12px;
     margin: 0px 5px;
-    color: black;
+    color: white;
+    font-family: "Rubik Bubbles", sans-serif;
 }
 
 .left_pane_tabs_label:hover {
@@ -138,8 +144,9 @@ body {
     height: 60rem;
     margin: 10px;
     padding: 10px;
-    border: 2px solid grey;
+    border: 3px solid grey;
     border-radius: 12px;
+
 }
 
 .site_footer {
@@ -194,10 +201,10 @@ img {
     width: 7rem;
 }
 
-.right_pane_section_two {}
+/* .right_pane_section_two {}
 
 .section_two_item {}
 
 .right_pane_section_three {}
 
-.section_three_item {}
+.section_three_item {} */

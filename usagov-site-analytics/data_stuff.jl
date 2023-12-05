@@ -14,7 +14,7 @@ DotEnv.config();
 
 
 #global vars
-UPLOAD_DATA_TO_MONGODB = true;
+UPLOAD_DATA_TO_MONGODB = false;
 
 
 
@@ -292,10 +292,12 @@ string_data_dict_array = fetch_string_data(request_dataframe_dict_array_object, 
 #uploading to database stuff
 mongodb_object = Mongodb_stuff(mongodb_username_env, mongodb_password_env, mongodb_connection_uri, mongodb_database_name, mongodb_collection_name)
 mongo_client = initiate_connection(mongodb_object)
+if UPLOAD_DATA_TO_MONGODB
+
 empty_mongodb_collection(mongodb_object, mongo_client)
 upload_data_to_mongodb(mongodb_object, mongo_client, string_data_dict_array)
 disband_connection(mongodb_object, mongo_client)
-
+end
 
 
 

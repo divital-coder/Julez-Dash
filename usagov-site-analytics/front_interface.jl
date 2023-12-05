@@ -18,6 +18,7 @@ using PlotlyJS;
 
 #-----------------------------------FINALISED DATA VARIABLES VALUES------------------------------------
 #global variables
+global data_frame_for_plotting = nothing
 
 
 
@@ -26,9 +27,8 @@ using PlotlyJS;
 
 
 
-
-tab_styling = Dict("background" => "linear-gradient(90deg, var(#fbc2eb, #f6d365), var(#a6c1ee, #fda085) 51%, var(#fbc2eb, #f6d365)) var(--x, 0)/ 200%;")
-
+#tab_styling = Dict("background" => "linear-gradient(90deg, var(#fbc2eb, #f6d365), var(#a6c1ee, #fda085) 51%, var(#fbc2eb, #f6d365)) var(--x, 0)/ 200%;")
+tab_styling = Dict("background-color"=>"#2C3333")
 
 # header_agency_dropdown_options = fetch_agency_names("agency_dropdown_options");
 
@@ -45,19 +45,20 @@ frontend_layout = html_div(children=[
                 dcc_dropdown(options=header_agency_dropdown_options, value=header_agency_dropdown_options[1]["value"], style=Dict("border" => "none", "display" => "flex", "align-items" => "center", "justify-content" => "center", "text-align" => "center", "border-radius" => "40px", "cursor" => "pointer", "color" => "black", "font-family" => "sans-serif"), id="agency_dropdown"),
                 html_div(
                     children=[
-                        html_a("usa.gov", href="https://usa.gov", className="site_redirect_link")], className="site_redirect_link_container", id="showthis"),
+                        html_a("usa.gov", href="https://usa.gov", className="site_redirect_link")], className="site_redirect_link_container", id="showthis")
             ], className="content_header"),
         # main section of the page
         html_div(
             children=[
                 # left pane things
                 html_div(children=[
-                        html_h2("Most Popular"),
+                        html_h2("Most Popular", className="left_pane_heading"),
                         dcc_tabs(children=[
                                 dcc_tab(label="Top Domains\n(Past Week)", value="weekly_domains", className="left_pane_tabs_label", style=tab_styling),
                                 dcc_tab(label="Top Domains\n(Past Month)", value="monthly_domains", className="left_pane_tabs_label", style=tab_styling),
                                 dcc_tab(label="Top Pages\n(Now)", value="pages_now", className="left_pane_tabs_label", style=tab_styling)
-                            ], id="left_pane_tabs", value="weekly_domains"), html_div(id="left_pane_graphs", children=[])
+                            ], id="left_pane_tabs", value="weekly_domains"), 
+                            html_div(id="left_pane_graphs", children=[])
                     ], className="left_pane"),
                 # right pane things
                 html_div(
@@ -108,20 +109,24 @@ Application.layout = frontend_layout;
 
 
 # callbacks related to our application
-callback!(Application, Output("showthis", "children"), Input("agency_dropdown", "value")) do selected_agency_option
+callback!(Application, Output("dummy", "children"), Input("agency_dropdown", "value")) do selected_agency_option
     data = get_domain_data(selected_agency_option, dataframe_dict_array)
-
     #instantiating final stuff
     top_domains_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
     set_properties_top_domains(top_domains_display_data_object, data)
-    final_top_domain_week_data(top_domains_display_data_object)
+    println(final_top_domain_week_data(top_domains_display_data_object))
+    
+   return ""
 end
 
 
 
 
 callback!(Application, Output("left_pane_graphs", "children"), Input("left_pane_tabs", "value")) do tab_value
-
+    global data_frame_for_plotting
+    plot_this = plot(data_frame_for_plotting)
+    println(data_frame_for_plotting)
+    return dcc_graph(figure=plot_this)
 end
 
 
