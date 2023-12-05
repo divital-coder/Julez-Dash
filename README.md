@@ -4,7 +4,7 @@
 
 ### Currently, DASH's documentation lacks a lot of information for implementing a bare-bones application in Julia.
 
-### Julia, being a seemingly promising language for mathematical modeling and data-intensive applications, needs some well-deserved respect from a framework built solely upon taking data in mind. This repository provides homage to a number of applications showcased under Plotly's Dash framework as sample apps at "https://dash.gallery" but built entirely upon the Julia lang ecosystem.
+### Julia, being a seemingly promising language for mathematical modeling and data-intensive applications, needs some well-deserved respect from a framework built solely upon taking data in mind. This repository provides homage to a number of applications showcased under Plotly's Dash framework as sample apps at [dash-gallery](https://dash.gallery) but built entirely upon the Julia lang ecosystem.
 ![Screenshot_2023-09-15-09-33-01_683](https://github.com/divital-coder/Julez-Dash/assets/77094628/bf6510ad-871e-4f91-adeb-9cffdac68dd6)
 
 
