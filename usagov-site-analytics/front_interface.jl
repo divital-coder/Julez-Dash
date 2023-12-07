@@ -18,7 +18,18 @@ using PlotlyJS;
 
 #-----------------------------------FINALISED DATA VARIABLES VALUES------------------------------------
 #global variables
-global data_frame_for_plotting = ""
+
+
+#instantiating intitial top_domain_week_data to not wait for a potential callback input and have delay
+
+function load_initial_top_domain_data_frame()
+  data = get_domain_data("all", dataframe_dict_array)
+  top_domain_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
+  data_frame_for_plotting = final_top_domain_week_data(top_domain_display_data_object)
+  return data_frame_for_plotting
+  println(data_frame_for_plotting)
+end
+global data_frame_for_plotting = load_initial_top_domain_data_frame()
 
 
 

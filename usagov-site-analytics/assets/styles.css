@@ -185,8 +185,9 @@ body {
 
 .right_pane_section_one {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 10px;
+    
 }
 
 .section_one_item {
@@ -194,6 +195,7 @@ body {
     height: 20px;
     border-radius: 12px;
     color: #ffffff;
+    background-color : red;
 }
 
 img {
@@ -201,7 +203,8 @@ img {
     width: 7rem;
 }
 
-/* .right_pane_section_two {}
+/*
+ .right_pane_section_two {}
 
 .section_two_item {}
 
