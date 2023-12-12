@@ -86,8 +86,15 @@ get_top_traffic_sources_30_days(id,data) = begin
 end
 
 
-
-
+get_all_pages_realtime_data(id,data) = begin
+  all_pages_realtime_dataframe_dict = Dict()
+  for data_frame_dict in data
+    if data_frame_dict["id"] == lowercase(id)
+      all_pages_realtime_dataframe_dict["all-pages-realtime.csv"] = data_frame_dict["all-pages-realtime.csv"]
+    end
+  end
+  return all_pages_realtime_dataframe_dict
+end
 
 
 

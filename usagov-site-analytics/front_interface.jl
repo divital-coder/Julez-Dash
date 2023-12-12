@@ -84,6 +84,46 @@ for num in traffic_for_visits_in_string_array
 end
 println(data_frame_for_plotting_top_traffic_sources)
 
+###############################################################################################################
+
+
+function load_initial_all_pages_realtime_data()
+  data = get_all_pages_realtime_data("all", dataframe_dict_array)
+  all_pages_realtime_data_object = all_pages_realtime_data("")
+  set_properties_all_pages_realtime(all_pages_realtime_data_object, data["all-pages-realtime.csv"])
+  return final_all_pages_realtime_data(all_pages_realtime_data_object)
+end
+global data_frame_for_plotting_realtime_count = load_initial_all_pages_realtime_data()
+realtime_active_visitors_string_array = data_frame_for_plotting_realtime_count[!, :active_visitors]
+global realtime_active_visitors_calculation = 0
+
+for num in realtime_active_visitors_string_array
+  global realtime_active_visitors_calculation
+  realtime_active_visitors_calculation += num
+end
+
+
+println(data_frame_for_plotting_realtime_count)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #tab_styling = Dict("background" => "linear-gradient(90deg, var(#fbc2eb, #f6d365), var(#a6c1ee, #fda085) 51%, var(#fbc2eb, #f6d365)) var(--x, 0)/ 200%;")
 tab_styling = Dict("background-color" => "#2C3333")
 
@@ -179,7 +219,7 @@ Application.layout = frontend_layout;
 
 
 # callbacks related to our application
-callback!(Application, Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
+callback!(Application, Output("callback_section_one_item_value_people", "children"), Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
   global data_frame_for_plotting_domains
   data = get_domain_data(selected_agency_option, dataframe_dict_array)
   println(selected_agency_option)
@@ -191,7 +231,7 @@ callback!(Application, Output("callback_section_one_item_value_users", "children
   println(data_frame_for_plotting_domains)
 
 
-
+  ####################################################################################################################
 
   global data_frame_for_plotting_visitors_from_cities
   global data_frame_for_plotting_visitors_from_countries
@@ -204,7 +244,7 @@ callback!(Application, Output("callback_section_one_item_value_users", "children
   println(data_frame_for_plotting_visitors_from_cities)
   println(data_frame_for_plotting_visitors_from_countries)
 
-
+  ############################################################################################################################
   global data_frame_for_plotting_top_traffic_sources
   data = get_top_traffic_sources_30_days(selected_agency_option, dataframe_dict_array)
   top_traffic_sources_30_days_data_object = top_traffic_sources_30_days_data("")
@@ -214,8 +254,35 @@ callback!(Application, Output("callback_section_one_item_value_users", "children
   println(data_frame_for_plotting_top_traffic_sources)
 
   global traffic_for_visits_calculation
+  traffic_for_visits_calculation = 0
+  traffic_for_visits_in_string_array = data_frame_for_plotting_top_traffic_sources[!, :visits]
+  for num in traffic_for_visits_in_string_array
+    traffic_for_visits_calculation += tryparse(Int, num)
+  end
+
   global traffic_for_users_calculation
-  return (traffic_for_users_calculation, traffic_for_visits_calculation, "")
+  traffic_for_users_calculation = 0
+  traffic_for_users_in_string_array = data_frame_for_plotting_top_traffic_sources[!, :users]
+  for num in traffic_for_users_in_string_array
+    traffic_for_users_calculation += tryparse(Int, num)
+  end
+
+  #################################################################################################################################
+
+  global realtime_active_visitors_calculation
+  data = get_all_pages_realtime_data(selected_agency_option, dataframe_dict_array)
+  all_pages_realtime_data_object = all_pages_realtime_data("")
+  set_properties_all_pages_realtime(all_pages_realtime_data_object, data["all-pages-realtime.csv"])
+  data_frame_for_plotting_realtime_count = final_all_pages_realtime_data(all_pages_realtime_data_object)
+
+  realtime_active_visitors_string_array = data_frame_for_plotting_realtime_count[!, :active_visitors]
+  realtime_active_visitors_calculation = 0
+  for num in realtime_active_visitors_string_array
+    global realtime_active_visitors_calculation
+    realtime_active_visitors_calculation += num
+  end
+
+  return (realtime_active_visitors_calculation, traffic_for_users_calculation, traffic_for_visits_calculation, "")
 end
 
 

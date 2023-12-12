@@ -83,4 +83,39 @@ final_top_traffic_sources_30_days_data(object::top_traffic_sources_30_days_data)
   return top_traffic_sources_30_days_dataframe
 end
 
+##################################################################################
+#
+#
+
+
+mutable struct all_pages_realtime_data
+  all_pages_realtime_dataframe
+end
+set_properties_all_pages_realtime(object::all_pages_realtime_data, all_pages_realtime_dataframe) = begin
+  object.all_pages_realtime_dataframe = all_pages_realtime_dataframe
+end
+final_all_pages_realtime_data(object::all_pages_realtime_data) = begin
+  all_pages_realtime_dataframe = object.all_pages_realtime_dataframe
+  return all_pages_realtime_dataframe
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
