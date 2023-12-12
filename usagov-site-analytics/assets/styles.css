@@ -202,7 +202,7 @@ p{
     font-size:1.3rem;
     padding:0.5rem;
     width: 20rem;
-    height:4rem;
+    /*height:4rem;*/
     border-radius: 12px;
     color: #ffffff;
     background-color : #2C3333;
@@ -212,17 +212,44 @@ p{
     text-align:center;
     
 }
+.section_one_item_image{
+    margin-lefT:auto;
+    margin-right:auto;
+}
 
 img {
     height: auto;
     width: 7rem;
 }
 .traffic_breakdown_heading{
-    font-family:"Rubik Bubbles", sans-serif;
+    font-family:"Nunito", sans-serif;
     font-size:1.5rem;
     text-align:center;
-    border:3px solid black;
+    border:4px solid black;
+    padding:0.5rem 2rem;
+    border-radius:20px;
+    width:40%;
+    background-color:#2c3333;
+    color:white;
+    margin:10px auto;
+    cursor:pointer;
+    font-weight:bolder;
+    animation: scaling_traffic_breakdown_heading 1s infinite;
+    
 }
+@keyframes scaling_traffic_breakdown_heading{
+    0%{
+    transform:scale(90%);
+    }
+    50%{
+
+    transform:scale(100%);
+    }
+    100%{
+    transform:scale(90%);
+    }
+}
+
 /*
  .right_pane_section_two {}
 

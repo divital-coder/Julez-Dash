@@ -25,18 +25,64 @@ using PlotlyJS;
 function load_initial_top_domain_data_frame()
   data = get_domain_data("all", dataframe_dict_array)
   top_domain_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
-  data_frame_for_plotting = final_top_domain_week_data(top_domain_display_data_object)
-  return data_frame_for_plotting
-  println(data_frame_for_plotting)
+  set_properties_top_domains(top_domain_display_data_object, data)
+  data_frame_for_plotting_domains = final_top_domain_week_data(top_domain_display_data_object)
+  return data_frame_for_plotting_domains
 end
-global data_frame_for_plotting = load_initial_top_domain_data_frame()
-println(data_frame_for_plotting)
+global data_frame_for_plotting_domains = load_initial_top_domain_data_frame()
+println(data_frame_for_plotting_domains)
+
+
+#########################function for loading location of visitors data from cities and countries
+function load_initial_location_of_visitors_data_frame(source)
+
+  data = get_location_of_visitors_data("all", dataframe_dict_array)
+  location_of_visitors_data_object = location_of_visitors_data("", "")
+  set_properties_location_of_visitors(location_of_visitors_data_object, data["top-cities-realtime.json"], data["top-countries-realtime.json"])
+
+
+  if source == "cities"
+    return final_location_of_visitors_from_cities_data_frame(location_of_visitors_data_object)
+  elseif source == "countries"
+    return final_location_of_visitors_from_countries_data_frame(location_of_visitors_data_object)
+  end
+end
+global data_frame_for_plotting_visitors_from_cities = load_initial_location_of_visitors_data_frame("cities")
+global data_frame_for_plotting_visitors_from_countries = load_initial_location_of_visitors_data_frame("countries")
+println(data_frame_for_plotting_visitors_from_cities)
+println(data_frame_for_plotting_visitors_from_countries)
 
 
 
 
 
 
+
+
+
+#################################################function for loading top traffic sources for the past 30 days
+function load_initial_top_traffic_sources_30_days_data()
+  data = get_top_traffic_sources_30_days("all", dataframe_dict_array)
+  top_traffic_sources_30_days_data_object = top_traffic_sources_30_days_data("")
+  set_properties_top_traffic_sources_30_days(top_traffic_sources_30_days_data_object, data["top-traffic-sources-30-days.json"])
+  return final_top_traffic_sources_30_days_data(top_traffic_sources_30_days_data_object)
+end
+global data_frame_for_plotting_top_traffic_sources = load_initial_top_traffic_sources_30_days_data()
+
+traffic_for_users_in_string_array = data_frame_for_plotting_top_traffic_sources[!, :users]
+global traffic_for_users_calculation = 0
+traffic_for_visits_in_string_array = data_frame_for_plotting_top_traffic_sources[!, :visits]
+global traffic_for_visits_calculation = 0
+
+for num in traffic_for_users_in_string_array
+  global traffic_for_users_calculation
+  traffic_for_users_calculation += tryparse(Int, num)
+end
+for num in traffic_for_visits_in_string_array
+  global traffic_for_visits_calculation
+  traffic_for_visits_calculation += tryparse(Int, num)
+end
+println(data_frame_for_plotting_top_traffic_sources)
 
 #tab_styling = Dict("background" => "linear-gradient(90deg, var(#fbc2eb, #f6d365), var(#a6c1ee, #fda085) 51%, var(#fbc2eb, #f6d365)) var(--x, 0)/ 200%;")
 tab_styling = Dict("background-color" => "#2C3333")
@@ -76,15 +122,17 @@ frontend_layout = html_div(children=[
           children=[
             html_div(children=[html_div(children=[
                     html_h2("109090900", id="callback_section_one_item_value_people"),
-                    html_p("people on all sites right now")
+                    html_p("people on all sites right now"),
+                    html_img(src="./assets/icons8-monitor-100.png", className="section_one_item_image")
                   ], className="section_one_item"),
                 html_div(children=[
                     html_h2("100", id="callback_section_one_item_value_users"),
-                    html_p("total users (past month)")
+                    html_p("total users (past month)"),
+                    html_img(src="./assets/icons8-crowd-100.png", className="section_one_item_image")
                   ], className="section_one_item"),
-                html_div(children=[
-                    html_h2("100", id="callback_section_one_item_value_visits"),
-                    html_p("total visits (past month)")
+                html_div(children=[html_h2("100", id="callback_section_one_item_value_visits"),
+                    html_p("total visits (past month)"),
+                    html_img(src="./assets/icons8-eye-100.png", className="section_one_item_image")
                   ], className="section_one_item")
               ], className="right_pane_section_one"),
 
@@ -92,12 +140,15 @@ frontend_layout = html_div(children=[
             #v whack a moled!
             html_div("TRAFFIC BREAKDOWN", className="traffic_breakdown_heading"),
             html_div(children=[
-                html_div(className="section_two_item"),
-                html_div(className="section_two_item")],
+                html_div(children=[
+                    dcc_graph(figure=plot(bar(x=["apple", "lemon"], y=[1, 2])))
+                  ], className="section_two_item"),
+                html_div(children=[
+                  ], className="section_two_item")],
               className="right_pane_section_two"),
             html_div(children=[
-                html_div(className="section_three_item"),
-                html_div(className="section_three_item")
+                html_div(children=[
+                  ], className="section_three_item")
               ], className="right_pane_section_three")],
           className="right_pane")],
       className="main_content"),#ending of html main_content ,
@@ -128,27 +179,52 @@ Application.layout = frontend_layout;
 
 
 # callbacks related to our application
-callback!(Application, Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
-  global data_frame_for_plotting
+callback!(Application, Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
+  global data_frame_for_plotting_domains
   data = get_domain_data(selected_agency_option, dataframe_dict_array)
   println(selected_agency_option)
   #instantiating final stuff
 
   top_domains_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
   set_properties_top_domains(top_domains_display_data_object, data)
-  data_frame_for_plotting = final_top_domain_week_data(top_domains_display_data_object)
-  println(data_frame_for_plotting)
+  data_frame_for_plotting_domains = final_top_domain_week_data(top_domains_display_data_object)
+  println(data_frame_for_plotting_domains)
 
-  return ""
+
+
+
+  global data_frame_for_plotting_visitors_from_cities
+  global data_frame_for_plotting_visitors_from_countries
+  data = get_location_of_visitors_data(selected_agency_option, dataframe_dict_array)
+  location_of_visitors_data_object = location_of_visitors_data("", "")
+  set_properties_location_of_visitors(location_of_visitors_data_object, data["top-cities-realtime.json"], data["top-countries-realtime.json"])
+  data_frame_for_plotting_visitors_from_cities = final_location_of_visitors_from_cities_data_frame(location_of_visitors_data_object)
+  data_frame_for_plotting_visitors_from_countries = final_location_of_visitors_from_countries_data_frame(location_of_visitors_data_object)
+
+  println(data_frame_for_plotting_visitors_from_cities)
+  println(data_frame_for_plotting_visitors_from_countries)
+
+
+  global data_frame_for_plotting_top_traffic_sources
+  data = get_top_traffic_sources_30_days(selected_agency_option, dataframe_dict_array)
+  top_traffic_sources_30_days_data_object = top_traffic_sources_30_days_data("")
+  set_properties_top_traffic_sources_30_days(top_traffic_sources_30_days_data_object, data["top-traffic-sources-30-days.json"])
+  data_frame_for_plotting_top_traffic_sources = final_top_traffic_sources_30_days_data(top_traffic_sources_30_days_data_object)
+
+  println(data_frame_for_plotting_top_traffic_sources)
+
+  global traffic_for_visits_calculation
+  global traffic_for_users_calculation
+  return (traffic_for_users_calculation, traffic_for_visits_calculation, "")
 end
 
 
 
 
 callback!(Application, Output("left_pane_graphs", "children"), Input("left_pane_tabs", "value")) do tab_value
-  global data_frame_for_plotting
-  plot_figure = plot(bar(x=data_frame_for_plotting[!, :domain],
-      y=data_frame_for_plotting[!, :visits],
+  global data_frame_for_plotting_domains
+  plot_figure = plot(bar(x=data_frame_for_plotting_domains[!, :domain],
+      y=data_frame_for_plotting_domains[!, :visits],
       marked_color="blue"
     ), Layout(title="Bar Plot")
   )
