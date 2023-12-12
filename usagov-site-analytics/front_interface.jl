@@ -30,7 +30,7 @@ function load_initial_top_domain_data_frame()
   println(data_frame_for_plotting)
 end
 global data_frame_for_plotting = load_initial_top_domain_data_frame()
-
+println(data_frame_for_plotting)
 
 
 
@@ -74,20 +74,28 @@ frontend_layout = html_div(children=[
         # right pane things
         html_div(
           children=[
-            html_div(children=[
+            html_div(children=[html_div(children=[
+                    html_h2("109090900", id="callback_section_one_item_value_people"),
+                    html_p("people on all sites right now")
+                  ], className="section_one_item"),
                 html_div(children=[
-                  html_div(className="section_one_item"),
-                  html_div(className="section_one_item"),
-                  html_div(className="section_one_item")]),
-                html_div(id="callback_section_one")
+                    html_h2("100", id="callback_section_one_item_value_users"),
+                    html_p("total users (past month)")
+                  ], className="section_one_item"),
+                html_div(children=[
+                    html_h2("100", id="callback_section_one_item_value_visits"),
+                    html_p("total visits (past month)")
+                  ], className="section_one_item")
               ], className="right_pane_section_one"),
 
 
             #v whack a moled!
+            html_div("TRAFFIC BREAKDOWN", className="traffic_breakdown_heading"),
             html_div(children=[
                 html_div(className="section_two_item"),
                 html_div(className="section_two_item")],
-              className="right_pane_section_two"), html_div(children=[
+              className="right_pane_section_two"),
+            html_div(children=[
                 html_div(className="section_three_item"),
                 html_div(className="section_three_item")
               ], className="right_pane_section_three")],
