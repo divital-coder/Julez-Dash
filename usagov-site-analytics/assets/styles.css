@@ -115,8 +115,7 @@ body {
 }
 
 .left_pane {
-    flex: 1;
-    height: 60rem;
+    min-height: 63rem;
     flex: 2;
     margin: 10px;
     padding: 10px;
@@ -141,7 +140,7 @@ body {
 
 .right_pane {
     flex: 4;
-    height: 60rem;
+    min-height: 63rem;
     margin: 10px;
     padding: 10px;
     border: 3px solid grey;
@@ -248,6 +247,11 @@ img {
     100%{
     transform:scale(90%);
     }
+}
+#lefte_pane_graphs{
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 /*

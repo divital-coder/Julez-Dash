@@ -22,21 +22,21 @@ using PlotlyJS;
 
 #instantiating intitial top_domain_week_data to not wait for a potential callback input and have delay
 
-function load_initial_top_domain_data_frame()
-  data = get_domain_data("all", dataframe_dict_array)
+function load_initial_top_domain_data_frame(selected_option)
+  data = get_domain_data(selected_option, dataframe_dict_array)
   top_domain_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
   set_properties_top_domains(top_domain_display_data_object, data)
   data_frame_for_plotting_domains = final_top_domain_week_data(top_domain_display_data_object)
   return data_frame_for_plotting_domains
 end
-global data_frame_for_plotting_domains = load_initial_top_domain_data_frame()
+global data_frame_for_plotting_domains = load_initial_top_domain_data_frame("all")
 println(data_frame_for_plotting_domains)
 
 
 #########################function for loading location of visitors data from cities and countries
-function load_initial_location_of_visitors_data_frame(source)
+function load_initial_location_of_visitors_data_frame(selected_option, source)
 
-  data = get_location_of_visitors_data("all", dataframe_dict_array)
+  data = get_location_of_visitors_data(selected_option, dataframe_dict_array)
   location_of_visitors_data_object = location_of_visitors_data("", "")
   set_properties_location_of_visitors(location_of_visitors_data_object, data["top-cities-realtime.json"], data["top-countries-realtime.json"])
 
@@ -47,8 +47,8 @@ function load_initial_location_of_visitors_data_frame(source)
     return final_location_of_visitors_from_countries_data_frame(location_of_visitors_data_object)
   end
 end
-global data_frame_for_plotting_visitors_from_cities = load_initial_location_of_visitors_data_frame("cities")
-global data_frame_for_plotting_visitors_from_countries = load_initial_location_of_visitors_data_frame("countries")
+global data_frame_for_plotting_visitors_from_cities = load_initial_location_of_visitors_data_frame("all", "cities")
+global data_frame_for_plotting_visitors_from_countries = load_initial_location_of_visitors_data_frame("all", "countries")
 println(data_frame_for_plotting_visitors_from_cities)
 println(data_frame_for_plotting_visitors_from_countries)
 
@@ -61,13 +61,13 @@ println(data_frame_for_plotting_visitors_from_countries)
 
 
 #################################################function for loading top traffic sources for the past 30 days
-function load_initial_top_traffic_sources_30_days_data()
-  data = get_top_traffic_sources_30_days("all", dataframe_dict_array)
+function load_initial_top_traffic_sources_30_days_data(selected_option)
+  data = get_top_traffic_sources_30_days(selected_option, dataframe_dict_array)
   top_traffic_sources_30_days_data_object = top_traffic_sources_30_days_data("")
   set_properties_top_traffic_sources_30_days(top_traffic_sources_30_days_data_object, data["top-traffic-sources-30-days.json"])
   return final_top_traffic_sources_30_days_data(top_traffic_sources_30_days_data_object)
 end
-global data_frame_for_plotting_top_traffic_sources = load_initial_top_traffic_sources_30_days_data()
+global data_frame_for_plotting_top_traffic_sources = load_initial_top_traffic_sources_30_days_data("all")
 
 traffic_for_users_in_string_array = data_frame_for_plotting_top_traffic_sources[!, :users]
 global traffic_for_users_calculation = 0
@@ -87,13 +87,13 @@ println(data_frame_for_plotting_top_traffic_sources)
 ###############################################################################################################
 
 
-function load_initial_all_pages_realtime_data()
-  data = get_all_pages_realtime_data("all", dataframe_dict_array)
+function load_initial_all_pages_realtime_data(selected_option)
+  data = get_all_pages_realtime_data(selected_option, dataframe_dict_array)
   all_pages_realtime_data_object = all_pages_realtime_data("")
   set_properties_all_pages_realtime(all_pages_realtime_data_object, data["all-pages-realtime.csv"])
   return final_all_pages_realtime_data(all_pages_realtime_data_object)
 end
-global data_frame_for_plotting_realtime_count = load_initial_all_pages_realtime_data()
+global data_frame_for_plotting_realtime_count = load_initial_all_pages_realtime_data("all")
 realtime_active_visitors_string_array = data_frame_for_plotting_realtime_count[!, :active_visitors]
 global realtime_active_visitors_calculation = 0
 
@@ -221,36 +221,24 @@ Application.layout = frontend_layout;
 # callbacks related to our application
 callback!(Application, Output("callback_section_one_item_value_people", "children"), Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
   global data_frame_for_plotting_domains
-  data = get_domain_data(selected_agency_option, dataframe_dict_array)
-  println(selected_agency_option)
-  #instantiating final stuff
-
-  top_domains_display_data_object = top_domains_display_data("", "", Dict(), Dict(), Dict())
-  set_properties_top_domains(top_domains_display_data_object, data)
-  data_frame_for_plotting_domains = final_top_domain_week_data(top_domains_display_data_object)
+  data_frame_for_plotting_domains = load_initial_top_domain_data_frame(selected_agency_option)
   println(data_frame_for_plotting_domains)
+  #instantiating final stuff
 
 
   ####################################################################################################################
 
   global data_frame_for_plotting_visitors_from_cities
   global data_frame_for_plotting_visitors_from_countries
-  data = get_location_of_visitors_data(selected_agency_option, dataframe_dict_array)
-  location_of_visitors_data_object = location_of_visitors_data("", "")
-  set_properties_location_of_visitors(location_of_visitors_data_object, data["top-cities-realtime.json"], data["top-countries-realtime.json"])
-  data_frame_for_plotting_visitors_from_cities = final_location_of_visitors_from_cities_data_frame(location_of_visitors_data_object)
-  data_frame_for_plotting_visitors_from_countries = final_location_of_visitors_from_countries_data_frame(location_of_visitors_data_object)
+  data_frame_for_plotting_visitors_from_cities = load_initial_location_of_visitors_data_frame(selected_agency_option, "cities")
+  data_frame_for_plotting_visitors_from_countries = load_initial_location_of_visitors_data_frame(selected_agency_option, "countries")
 
   println(data_frame_for_plotting_visitors_from_cities)
   println(data_frame_for_plotting_visitors_from_countries)
 
   ############################################################################################################################
   global data_frame_for_plotting_top_traffic_sources
-  data = get_top_traffic_sources_30_days(selected_agency_option, dataframe_dict_array)
-  top_traffic_sources_30_days_data_object = top_traffic_sources_30_days_data("")
-  set_properties_top_traffic_sources_30_days(top_traffic_sources_30_days_data_object, data["top-traffic-sources-30-days.json"])
-  data_frame_for_plotting_top_traffic_sources = final_top_traffic_sources_30_days_data(top_traffic_sources_30_days_data_object)
-
+  data_frame_for_plotting_top_traffic_sources = load_initial_top_traffic_sources_30_days_data(selected_agency_option)
   println(data_frame_for_plotting_top_traffic_sources)
 
   global traffic_for_visits_calculation
@@ -270,10 +258,8 @@ callback!(Application, Output("callback_section_one_item_value_people", "childre
   #################################################################################################################################
 
   global realtime_active_visitors_calculation
-  data = get_all_pages_realtime_data(selected_agency_option, dataframe_dict_array)
-  all_pages_realtime_data_object = all_pages_realtime_data("")
-  set_properties_all_pages_realtime(all_pages_realtime_data_object, data["all-pages-realtime.csv"])
-  data_frame_for_plotting_realtime_count = final_all_pages_realtime_data(all_pages_realtime_data_object)
+  global data_frame_for_plotting_realtime_count
+  data_frame_for_plotting_realtime_count = load_initial_all_pages_realtime_data(selected_agency_option)
 
   realtime_active_visitors_string_array = data_frame_for_plotting_realtime_count[!, :active_visitors]
   realtime_active_visitors_calculation = 0
@@ -290,19 +276,28 @@ end
 
 callback!(Application, Output("left_pane_graphs", "children"), Input("left_pane_tabs", "value")) do tab_value
   global data_frame_for_plotting_domains
-  plot_figure = plot(bar(x=data_frame_for_plotting_domains[!, :domain],
-      y=data_frame_for_plotting_domains[!, :visits],
-      marked_color="blue"
-    ), Layout(title="Bar Plot")
-  )
 
-  return dcc_graph(figure=plot_figure)
+  plot_figure = nothing
+  if tab_value == "weekly_domains" || tab_value == "monthly_domains"
+    plot_figure = plot(bar(x=data_frame_for_plotting_domains[!, :visits],
+        y=data_frame_for_plotting_domains[!, :domain],
+        marked_color="blue",
+        orientation="h"
+      ), Layout(height=800, width=600, barmode="overlay")
+    )
+  else
+    plot_figure = plot(bar(x=data_frame_for_plotting_domains[!, :visits],
+        y=data_frame_for_plotting_domains[!, :domain],
+        marked_color="blue", orientation="h"),
+      Layout(height=800, width=600, barmode="overlay")
+    )
+  end
+  return dcc_graph(figure=plot_figure, style=Dict("padding" => "0px", "margin-top" => "2rem", "border-radius" => "12px"))
 end
 
 
 
 run_server(Application, "0.0.0.0", debug=true);
-
 
 
 
