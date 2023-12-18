@@ -101,8 +101,16 @@ end
 
 
 
-
-
+mutable struct download_data
+download_dataframe
+end
+set_properties_download_data(object::download_data, download_dataframe) = begin
+object.download_dataframe = download_dataframe
+end
+final_download_dataframe(object::download_data) = begin
+download_dataframe = object.download_dataframe
+  return download_dataframe
+end
 
 
 

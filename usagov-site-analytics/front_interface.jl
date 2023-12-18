@@ -108,13 +108,15 @@ println(data_frame_for_plotting_realtime_count)
 
 
 
+function load_initial_download_data(selected_option)
+  data = get_download_data(selected_option, dataframe_dict_array)
+  download_data_object = download_data("")
+  set_properties_download_data(download_data_object, data["download"])
+  return final_download_dataframe(download_data_object)
+end
 
-
-
-
-
-
-
+global data_frame_for_plotting_download = load_initial_download_data("all")
+println(data_frame_for_plotting_download)
 
 
 
@@ -181,14 +183,13 @@ frontend_layout = html_div(children=[
             html_div("TRAFFIC BREAKDOWN", className="traffic_breakdown_heading"),
             html_div(children=[
                 html_div(children=[
-                    dcc_graph(figure=plot(bar(x=["apple", "lemon"], y=[1, 2])))
-                  ], className="section_two_item"),
+                  ], id="geo_scatter_plot_cities", className="section_two_item"),
                 html_div(children=[
-                  ], className="section_two_item")],
-              className="right_pane_section_two"),
+                  ], id="geo_scatter_plot_countries", className="section_two_item")],
+              className="right_pane_section_two"), html_div("TOP DOWNLOADS", className="top_downloads_heading"),
             html_div(children=[
                 html_div(children=[
-                  ], className="section_three_item")
+                  ], id="download_data_plot", className="section_three_item")
               ], className="right_pane_section_three")],
           className="right_pane")],
       className="main_content"),#ending of html main_content ,
@@ -219,7 +220,7 @@ Application.layout = frontend_layout;
 
 
 # callbacks related to our application
-callback!(Application, Output("callback_section_one_item_value_people", "children"), Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
+callback!(Application, Output("download_data_plot", "children"), Output("geo_scatter_plot_cities", "children"), Output("geo_scatter_plot_countries", "children"), Output("callback_section_one_item_value_people", "children"), Output("callback_section_one_item_value_users", "children"), Output("callback_section_one_item_value_visits", "children"), Output("dummy_output_container", "children"), Input("agency_dropdown", "value")) do selected_agency_option
   global data_frame_for_plotting_domains
   data_frame_for_plotting_domains = load_initial_top_domain_data_frame(selected_agency_option)
   println(data_frame_for_plotting_domains)
@@ -268,7 +269,53 @@ callback!(Application, Output("callback_section_one_item_value_people", "childre
     realtime_active_visitors_calculation += num
   end
 
-  return (realtime_active_visitors_calculation, traffic_for_users_calculation, traffic_for_visits_calculation, "")
+
+
+
+
+
+
+  cities_graph_figure = plot(bar(x=["apple", "mango"], y=[100, 200], orientation="h"), Layout(height=300, width=500))
+  graph_plot_for_cities = dcc_graph(figure=cities_graph_figure)
+
+
+
+
+
+
+
+  countries = ["USA", "Canada", "India", "UK"]
+  latitudes = [37.0902, 56.1304, 20.5937, 51.5099]
+  longitudes = [-95.7129, -106.3468, 78.9629, -0.1180]
+
+  # Create scatter geo map
+  trace = scattermapbox(
+    lat=latitudes,
+    lon=longitudes,
+    mode="markers", text=countries,
+  )
+
+  layout = Layout(
+    mapbox=attr(
+      style="carto-darkmatter",
+      center=attr(lat=30, lon=0),
+      zoom=1,
+      borderwidth=0,
+      padding=0,
+      height=400
+    ),
+    margin=attr(l=0, r=0, b=0, t=0)
+  )
+
+  countries_graph_figure = plot(trace, layout)
+  graph_plot_for_countries = dcc_graph(figure=countries_graph_figure, style=Dict("padding" => "0px", "border" => "none"))
+
+
+  global data_frame_for_plotting_download
+  data_frame_for_plotting_download = load_initial_download_data(selected_agency_option)
+  download_graph_figure = plot(bar(x=data_frame_for_plotting_download[!, :total_events], y=data_frame_for_plotting_download[!, :page_title], orientation="h", marked_color="blue"))
+  graph_plot_for_download = dcc_graph(figure=download_graph_figure)
+  return (graph_plot_for_download, graph_plot_for_cities, graph_plot_for_countries, realtime_active_visitors_calculation, traffic_for_users_calculation, traffic_for_visits_calculation, "")
 end
 
 

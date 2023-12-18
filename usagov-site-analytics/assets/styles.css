@@ -220,7 +220,7 @@ img {
     height: auto;
     width: 7rem;
 }
-.traffic_breakdown_heading{
+.traffic_breakdown_heading, .top_downloads_heading{
     font-family:"Nunito", sans-serif;
     font-size:1.5rem;
     text-align:center;
@@ -236,6 +236,7 @@ img {
     animation: scaling_traffic_breakdown_heading 1s infinite;
     
 }
+
 @keyframes scaling_traffic_breakdown_heading{
     0%{
     transform:scale(90%);
@@ -254,11 +255,25 @@ img {
     justify-content:center;
 }
 
-/*
- .right_pane_section_two {}
 
-.section_two_item {}
+.right_pane_section_two {
 
-.right_pane_section_three {}
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+}
 
-.section_three_item {} */
+.right_pane_section_three{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+}
+
+
+/* .section_two_item {}*/
+
+
+
+/*.section_three_item {} */
