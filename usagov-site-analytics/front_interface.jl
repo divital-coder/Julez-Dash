@@ -302,13 +302,13 @@ callback!(Application, Output("download_data_plot", "children"), Output("geo_sca
       zoom=1,
       borderwidth=0,
       padding=0,
-      height=400
+      
     ),
     margin=attr(l=0, r=0, b=0, t=0)
   )
 
   countries_graph_figure = plot(trace, layout)
-  graph_plot_for_countries = dcc_graph(figure=countries_graph_figure, style=Dict("padding" => "0px", "border" => "none"))
+  graph_plot_for_countries = dcc_graph(figure=countries_graph_figure, style=Dict("padding" => "0px", "border" => "none","width"=>"400px","height"=>"400px"))
 
 
   global data_frame_for_plotting_download

@@ -23,7 +23,13 @@ final_top_domain_week_data(object::top_domains_display_data) = begin
   past_week_date = current_date - Dates.Day(6)
   return first(top_domain_site_data_frame, 20)
 end
-# final_top_domain_month_data()
+final_top_domain_month_data(object::top_domains_display_data, data) = begin
+  top_domain_site_data_frame = object.top_domain_site_data_frame
+
+  current_date = Dates.today()
+  past_month_date = current_date - Dates.Day(30)
+  nothing
+end
 # final_top_domain_now_data()
 #
 #
@@ -102,13 +108,13 @@ end
 
 
 mutable struct download_data
-download_dataframe
+  download_dataframe
 end
 set_properties_download_data(object::download_data, download_dataframe) = begin
-object.download_dataframe = download_dataframe
+  object.download_dataframe = download_dataframe
 end
 final_download_dataframe(object::download_data) = begin
-download_dataframe = object.download_dataframe
+  download_dataframe = object.download_dataframe
   return download_dataframe
 end
 
