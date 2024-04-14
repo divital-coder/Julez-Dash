@@ -1,3 +1,12 @@
+##RUN
+<code>
+julia front_interface.jl
+</code>
+
+
+
+
+
 tech : julia , mongodb, plotly (graphs)
 packages within the julia environment : 
 HTTP (Making requests)
